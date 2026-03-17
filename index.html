@@ -1,14 +1,379 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ibleocare JA</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ibleo-Care JA</title>
+  <meta
+    name="description"
+    content="Ibleo-Care JA: sistema smart per monitorare temperatura e umidità del terreno e stimare quando annaffiare."
+  />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Ibleocare JA</h1>
-  <p>Sito ufficiale del rilevatore di umidità e temperatura.</p>
+  <header class="topbar">
+    <div class="container nav">
+      <a href="#home" class="brand">
+        <div class="brand-badge">IC</div>
+        <div class="brand-text">
+          <span class="brand-name">IBLEO-CARE</span>
+          <span class="brand-sub">JA</span>
+        </div>
+      </a>
+
+      <button class="menu-toggle" id="menuToggle" aria-label="Apri menu">
+        ☰
+      </button>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="#chi-siamo">Chi siamo</a>
+        <a href="#prodotto">Prodotto</a>
+        <a href="#componenti">Componenti</a>
+        <a href="#utilita">Utilità</a>
+        <a href="#contatti">Contatti</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="home">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="reveal">
+          <div class="eyebrow">Progetto JA • ITCA Fabio Besta di Ragusa</div>
+          <h1>IBLEO-CARE</h1>
+          <p class="hero-subtitle">
+            Monitoraggio intelligente per un ambiente migliore. Un sistema pensato
+            per vasi, aiuole e piccoli giardini, capace di rilevare temperatura e
+            umidità del terreno e stimare quando il verde ha bisogno di essere annaffiato.
+          </p>
+
+          <div class="hero-actions">
+            <a class="button button-primary" href="#prodotto">Scopri il progetto</a>
+            <a class="button button-secondary" href="#contatti">Contattaci</a>
+          </div>
+
+          <div class="stats">
+            <div class="stat-card">
+              <div class="stat-number">12</div>
+              <div class="stat-label">Persone nel team</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">2</div>
+              <div class="stat-label">Sensori principali</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">JA</div>
+              <div class="stat-label">Impresa scolastica</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">Smart</div>
+              <div class="stat-label">Monitoraggio del verde</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-card reveal">
+          <div class="mini-display">
+            <div class="mini-top">
+              <span>Dati del sistema</span>
+              <span id="statusLabel" class="status ok">attivo</span>
+            </div>
+
+            <div class="sensor-reading">
+              <div class="reading-box">
+                <div class="reading-label">Temperatura aria • DHT22</div>
+                <div class="reading-value">
+                  <span id="tempValue">24.8</span>°C
+                </div>
+              </div>
+
+              <div class="reading-box">
+                <div class="reading-label">Umidità terreno • Soil Sensor 2.0</div>
+                <div class="reading-value">
+                  <span id="soilValue">61</span>%
+                </div>
+              </div>
+            </div>
+
+            <div class="reading-box reading-box-large">
+              <div class="reading-label">Stato terreno</div>
+              <div class="reading-value-small" id="soilState">UMIDO</div>
+            </div>
+
+            <div class="reading-box reading-box-large">
+              <div class="reading-label">Previsione irrigazione</div>
+              <div class="reading-value-small" id="etaValue">tra 18 ore</div>
+            </div>
+
+            <div class="mini-footer">
+              <span>Accensione smart con TTP223</span>
+              <span>Minor spreco energetico</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="chi-siamo">
+      <div class="container grid-2">
+        <div class="panel reveal">
+          <p class="eyebrow">Chi siamo</p>
+          <h2 class="section-title">Un team scolastico che unisce economia, web e tecnica.</h2>
+          <p class="section-text">
+            Ibleo-Care JA nasce all'interno dell'ITCA Fabio Besta di Ragusa.
+            Siamo un gruppo di 12 persone che lavora insieme per sviluppare un
+            prodotto utile, concreto e sostenibile.
+          </p>
+
+          <div class="role-list">
+            <div class="role-item">
+              <div class="role-dot"></div>
+              <div>
+                <strong>9 alunni</strong><br />
+                Partecipano allo sviluppo, all'organizzazione e alla presentazione del progetto.
+              </div>
+            </div>
+
+            <div class="role-item">
+              <div class="role-dot"></div>
+              <div>
+                <strong>1 professoressa di economia</strong><br />
+                Segue la parte economica dell'azienda e la struttura imprenditoriale del progetto.
+              </div>
+            </div>
+
+            <div class="role-item">
+              <div class="role-dot"></div>
+              <div>
+                <strong>1 professore di informatica</strong><br />
+                Supporta la parte digitale e la realizzazione del sito web.
+              </div>
+            </div>
+
+            <div class="role-item">
+              <div class="role-dot"></div>
+              <div>
+                <strong>1 tecnico informatico</strong><br />
+                Si occupa dell'assemblaggio del microcontrollore e della parte tecnica del dispositivo.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel image-panel reveal">
+          <div class="image-placeholder">
+            <div>
+              <h3>Foto e video del progetto</h3>
+              <p>
+                Qui puoi inserire immagini del team, del prototipo e dei test reali del dispositivo.
+              </p>
+              <p class="small-note">
+                In seguito possiamo trasformare questa zona in una vera galleria.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="prodotto">
+      <div class="container">
+        <p class="eyebrow">Il prodotto</p>
+        <h2 class="section-title">Un aiuto smart per la cura quotidiana delle piante.</h2>
+        <p class="section-text">
+          Ibleo-Care JA è un sistema progettato per monitorare temperatura e umidità
+          del terreno in contesti di piccole dimensioni, come vasi, aiuole e giardini
+          domestici. Non è pensato per uso industriale: nasce per offrire un supporto
+          semplice, utile e intelligente a chi vuole prendersi cura del verde evitando sprechi.
+        </p>
+
+        <div class="cards">
+          <article class="card reveal">
+            <div class="card-icon">🌡️</div>
+            <h3>Temperatura dell'ambiente</h3>
+            <p>
+              Il sensore DHT22 misura la temperatura per fornire dati utili alla lettura
+              complessiva delle condizioni della pianta.
+            </p>
+          </article>
+
+          <article class="card reveal">
+            <div class="card-icon">💧</div>
+            <h3>Umidità del terreno</h3>
+            <p>
+              Il Soil Sensor 2.0 rileva lo stato del terreno e permette di capire
+              se la pianta ha ancora riserva d'acqua oppure no.
+            </p>
+          </article>
+
+          <article class="card reveal">
+            <div class="card-icon">⏱️</div>
+            <h3>Stima dell'annaffiatura</h3>
+            <p>
+              Il sistema elabora i dati raccolti per stimare tra quanto tempo
+              il terreno avrà bisogno di essere irrigato.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="componenti">
+      <div class="container grid-2">
+        <div class="panel reveal">
+          <p class="eyebrow">Componenti principali</p>
+          <h2 class="section-title">Tecnologia concreta e orientata al risparmio.</h2>
+
+          <div class="feature-list">
+            <div class="feature-item">
+              <h3>Arduino UNO R4 WiFi</h3>
+              <p>È il cuore del progetto e gestisce la lettura dei moduli e la logica del sistema.</p>
+            </div>
+
+            <div class="feature-item">
+              <h3>DHT22</h3>
+              <p>Rileva la temperatura ambientale.</p>
+            </div>
+
+            <div class="feature-item">
+              <h3>Soil Sensor 2.0</h3>
+              <p>Misura l'umidità del terreno, fondamentale per capire quando irrigare.</p>
+            </div>
+
+            <div class="feature-item">
+              <h3>Schermo OLED</h3>
+              <p>Mostra le informazioni in modo chiaro e immediato.</p>
+            </div>
+
+            <div class="feature-item">
+              <h3>TTP223</h3>
+              <p>Permette l'accensione smart dei componenti solo quando necessario.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel reveal">
+          <p class="eyebrow">Come funziona</p>
+          <h2 class="section-title">Dal sensore al consiglio utile.</h2>
+
+          <div class="timeline">
+            <div class="timeline-step">
+              <div class="timeline-badge">1</div>
+              <div>
+                <strong>Raccolta dati</strong><br />
+                Il dispositivo legge temperatura dell'aria e umidità del terreno.
+              </div>
+            </div>
+
+            <div class="timeline-step">
+              <div class="timeline-badge">2</div>
+              <div>
+                <strong>Elaborazione</strong><br />
+                Il microcontrollore usa i dati per stimare il prossimo bisogno di irrigazione.
+              </div>
+            </div>
+
+            <div class="timeline-step">
+              <div class="timeline-badge">3</div>
+              <div>
+                <strong>Visualizzazione</strong><br />
+                I valori vengono mostrati su schermo OLED e sulla pagina web.
+              </div>
+            </div>
+
+            <div class="timeline-step">
+              <div class="timeline-badge">4</div>
+              <div>
+                <strong>Uso smart</strong><br />
+                Il TTP223 permette di attivare i componenti solo quando serve.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="utilita">
+      <div class="container">
+        <p class="eyebrow">Perché è utile</p>
+        <h2 class="section-title">Meno sprechi, più attenzione al verde.</h2>
+
+        <div class="cards">
+          <article class="card reveal">
+            <div class="card-icon">🚿</div>
+            <h3>Riduce lo spreco d'acqua</h3>
+            <p>Aiuta a capire quando annaffiare davvero, evitando irrigazioni inutili.</p>
+          </article>
+
+          <article class="card reveal">
+            <div class="card-icon">🌱</div>
+            <h3>Preserva la salute delle piante</h3>
+            <p>Il monitoraggio costante aiuta a mantenere condizioni più adatte al verde.</p>
+          </article>
+
+          <article class="card reveal">
+            <div class="card-icon">🏡</div>
+            <h3>Ideale per piccoli spazi</h3>
+            <p>È pensato per vasi, aiuole e piccoli giardini, non per uso industriale.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="contatti">
+      <div class="container grid-2">
+        <div class="panel reveal">
+          <p class="eyebrow">Contatti</p>
+          <h2 class="section-title">Vuoi saperne di più su Ibleo-Care JA?</h2>
+          <p class="section-text">
+            Siamo felici di raccontare il progetto, mostrare il prototipo e condividere
+            il lavoro del team.
+          </p>
+
+          <div class="contact-box">
+            <div class="contact-item">
+              <div class="contact-label">Email</div>
+              <div class="contact-value">
+                <a href="mailto:ibleocare@gmail.com">ibleocare@gmail.com</a>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-label">Instagram</div>
+              <div class="contact-value">
+                <a href="https://instagram.com/ibleocare" target="_blank" rel="noreferrer">
+                  @ibleocare
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel reveal">
+          <p class="eyebrow">Nota importante</p>
+          <h2 class="section-title">Questa pagina è pronta anche per i dati reali.</h2>
+          <p class="section-text">
+            Al momento la dashboard in alto usa dati simulati. In una fase successiva
+            possiamo collegarla ai valori reali provenienti dal sistema Arduino UNO R4 WiFi
+            o da un endpoint web generato dal dispositivo.
+          </p>
+
+          <div class="feature-list">
+            <div class="feature-item">
+              <h3>Già pronto per crescere</h3>
+              <p>Possiamo aggiungere foto, video dei test, FAQ e collegamento ai dati reali.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      © <span id="year"></span> Ibleo-Care JA • ITCA Fabio Besta di Ragusa
+    </div>
+  </footer>
 
   <script src="script.js"></script>
 </body>
