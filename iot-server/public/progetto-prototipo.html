@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prototipo Arduino R4 — IbleoCare</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root { --primary-green: #20c997; --dark-green: #0a2e1c; --earth-brown: #8B4513; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; scroll-behavior: smooth; background-color: #f8fbf9; padding-top: 80px; }
+        .navbar { background: rgba(10,46,28,0.97) !important; position: fixed; top: 0; width: 100%; z-index: 1000; padding-top: 10px; padding-bottom: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.3); }
+        .nav-link { color: rgba(255,255,255,0.9) !important; font-weight: 500; font-size: 1.05rem; margin: 0 3px; transition: color 0.3s; }
+        .nav-link:hover, .nav-link:focus { color: var(--primary-green) !important; }
+        .dropdown-menu { background-color: rgba(10,46,28,0.97); border: 1px solid rgba(32,201,151,0.2); backdrop-filter: blur(10px); }
+        .dropdown-item { color: white; transition: background 0.2s, padding-left 0.2s; }
+        .dropdown-item:hover { background-color: rgba(32,201,151,0.2); color: var(--primary-green); padding-left: 20px; }
+        .offcanvas-end { background-color: var(--dark-green); color: white; border-left: 4px solid var(--primary-green); }
+        .navbar-toggler { border: none; box-shadow: none !important; }
+        .navbar-toggler-icon { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e"); }
+
+        /* HERO stile laboratorio */
+        .page-hero { padding: 70px 0 60px; color: white; position: relative; overflow: hidden; }
+        .page-hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%); z-index: 0; }
+        /* Griglia tecnica di sfondo */
+        .page-hero::after { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(32,201,151,0.05) 1px,transparent 1px), linear-gradient(90deg,rgba(32,201,151,0.05) 1px,transparent 1px); background-size: 40px 40px; z-index: 0; }
+        .page-hero .container { position: relative; z-index: 1; }
+        .breadcrumb-item a { color: var(--primary-green); text-decoration: none; }
+        .breadcrumb-item.active { color: rgba(255,255,255,0.7); }
+        .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.4); }
+
+        section { padding: 80px 0; }
+        .section-title { font-weight: 800; position: relative; margin-bottom: 60px; text-align: center; color: var(--dark-green); text-transform: uppercase; letter-spacing: 2px; }
+        .section-title::after { content: ''; width: 80px; height: 4px; background: var(--primary-green); position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); border-radius: 2px; }
+
+        /* POC BADGE */
+        .poc-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,193,7,0.12); border: 1px solid rgba(255,193,7,0.4); color: #ffc107; border-radius: 50px; padding: 8px 18px; font-size: 0.85rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+
+        /* SCHEDA TECNICA */
+        .spec-card { background: #0d1117; border: 1px solid rgba(32,201,151,0.2); border-radius: 16px; padding: 30px; font-family: 'Consolas', 'Courier New', monospace; }
+        .spec-card .spec-header { color: rgba(32,201,151,0.7); font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid rgba(32,201,151,0.15); padding-bottom: 12px; }
+        .spec-line { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 16px; }
+        .spec-line:last-child { border-bottom: none; }
+        .spec-key { color: rgba(255,255,255,0.45); font-size: 0.82rem; flex-shrink: 0; }
+        .spec-val { color: #79c0ff; font-size: 0.88rem; font-weight: 600; text-align: right; }
+        .spec-val.green { color: var(--primary-green); }
+        .spec-val.yellow { color: #ffc107; }
+        .spec-val.orange { color: #fd7e14; }
+
+        /* COMPONENTI HARDWARE */
+        .hw-item { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 4px 18px rgba(0,0,0,0.07); border-top: 3px solid transparent; display: flex; align-items: flex-start; gap: 18px; transition: transform 0.3s, box-shadow 0.3s; }
+        .hw-item:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.11); }
+        .hw-item.c-green { border-top-color: var(--primary-green); }
+        .hw-item.c-blue  { border-top-color: #0d6efd; }
+        .hw-item.c-yellow{ border-top-color: #ffc107; }
+        .hw-item.c-red   { border-top-color: #dc3545; }
+        .hw-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+        .hw-icon.g { background: rgba(32,201,151,0.12); color: var(--primary-green); }
+        .hw-icon.b { background: rgba(13,110,253,0.1); color: #0d6efd; }
+        .hw-icon.y { background: rgba(255,193,7,0.12); color: #ffc107; }
+        .hw-icon.r { background: rgba(220,53,69,0.1); color: #dc3545; }
+        .hw-body h5 { font-size: 0.95rem; font-weight: 700; color: var(--dark-green); margin-bottom: 4px; }
+        .hw-body p { font-size: 0.83rem; color: #666; margin: 0; line-height: 1.5; }
+        .hw-badge { font-size: 0.72rem; padding: 3px 10px; border-radius: 20px; margin-top: 8px; display: inline-block; font-weight: 600; }
+
+        /* TIMELINE SVILUPPO */
+        .timeline { position: relative; padding-left: 30px; }
+        .timeline::before { content: ''; position: absolute; left: 10px; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(to bottom, var(--primary-green), rgba(32,201,151,0.1)); }
+        .tl-item { position: relative; padding-bottom: 32px; }
+        .tl-item:last-child { padding-bottom: 0; }
+        .tl-dot { position: absolute; left: -25px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--primary-green); border: 3px solid #f8fbf9; box-shadow: 0 0 0 3px rgba(32,201,151,0.25); }
+        .tl-content { background: white; border-radius: 12px; padding: 20px 22px; box-shadow: 0 3px 14px rgba(0,0,0,0.07); border-left: 3px solid var(--primary-green); }
+        .tl-content h6 { font-size: 0.9rem; font-weight: 700; color: var(--dark-green); margin-bottom: 4px; }
+        .tl-content p { font-size: 0.83rem; color: #666; margin: 0; }
+        .tl-tag { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; background: rgba(32,201,151,0.12); color: var(--primary-green); margin-right: 6px; }
+
+        /* COSTO */
+        .cost-card { background: linear-gradient(135deg, var(--dark-green) 0%, #0d4a2a 100%); border-radius: 24px; padding: 50px 40px; text-align: center; position: relative; overflow: hidden; }
+        .cost-card::before { content: '€'; position: absolute; top: -30px; right: 20px; font-size: 12rem; color: rgba(32,201,151,0.05); font-weight: 900; line-height: 1; }
+        .cost-amount { font-size: 5rem; font-weight: 900; color: var(--primary-green); line-height: 1; }
+
+        .cta-section { background: var(--dark-green); }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark" id="mainNav">
+    <div class="container-fluid px-4 px-lg-5">
+        <a class="navbar-brand" href="index.html">
+            <img src="icon.svg" alt="Logo IbleoCare" height="60" style="filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5));">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+            <div class="offcanvas-header border-bottom border-success border-opacity-25 p-4">
+                <h5 class="offcanvas-title fw-bold text-success" id="offcanvasNavbarLabel"><i class="bi bi-tree-fill me-2"></i>IbleoCare</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <ul class="navbar-nav justify-content-end align-items-lg-center flex-grow-1 pe-3 gap-2">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">Il Progetto</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="progetto-descrizione.html">Descrizione Generale</a></li>
+                            <li><a class="dropdown-item" href="progetto-mission.html">Mission &amp; Obiettivi</a></li>
+                            <li><a class="dropdown-item active" href="progetto-prototipo.html">Prototipo Arduino R4</a></li>
+                            <li><a class="dropdown-item" href="progetto-prodotto-finito.html">Prodotto Finito PCB</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">La Soluzione</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="soluzione-problema.html">Il Problema</a></li>
+                            <li><a class="dropdown-item" href="soluzione-funzionamento.html">Come Funziona</a></li>
+                            <li><a class="dropdown-item" href="soluzione-tecnologie.html">Tecnologie &amp; Componenti</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Business</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="business-valore.html">Value Proposition</a></li>
+                            <li><a class="dropdown-item" href="business-mercato.html">Mercato</a></li>
+                            <li><a class="dropdown-item" href="business-prezzi.html">Costi e Prezzi</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#chisiamo">Chi Siamo</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#contatti">Contatti</a></li>
+                    <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
+                        <a href="/login.html" class="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm w-100">
+                            <i class="bi bi-lock-fill me-1"></i> Area Privata
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item"><a href="progetto-descrizione.html">Il Progetto</a></li>
+                <li class="breadcrumb-item active">Prototipo Arduino R4</li>
+            </ol>
+        </nav>
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <div class="poc-badge mb-3"><i class="bi bi-cone-striped"></i> Fase 1 · Proof of Concept</div>
+                <h1 class="display-4 fw-black mb-3" style="font-weight:900;">Prototipo<br><span style="color:var(--primary-green)">Arduino UNO R4</span></h1>
+                <p class="lead opacity-75 mb-0">Il nostro banco di prova scolastico. Hardware su breadboard, codice C++ scritto in classe, sensori capacitivi piantati nella terra di un vaso. Da qui è partito tutto.</p>
+            </div>
+            <div class="col-lg-5 text-center">
+                <div style="background:rgba(32,201,151,0.08);border:1px solid rgba(32,201,151,0.2);border-radius:20px;padding:30px;display:inline-block;">
+                    <i class="bi bi-cpu" style="font-size:5rem;color:var(--primary-green);filter:drop-shadow(0 4px 12px rgba(32,201,151,0.4));"></i>
+                    <div class="mt-3" style="font-family:'Consolas',monospace;color:rgba(32,201,151,0.7);font-size:0.8rem;">Arduino UNO R4 WiFi</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SEZIONE 1: SCHEDA TECNICA PROTOTIPO -->
+<section style="background:#f8fbf9;">
+    <div class="container">
+        <h2 class="section-title">Scheda Tecnica</h2>
+        <div class="row g-4 align-items-start">
+            <div class="col-lg-5">
+                <div class="spec-card">
+                    <div class="spec-header">// spec_prototipo.json</div>
+                    <div class="spec-line"><span class="spec-key">microcontrollore</span><span class="spec-val green">"Arduino UNO R4 WiFi"</span></div>
+                    <div class="spec-line"><span class="spec-key">architettura</span><span class="spec-val">Renesas RA4M1 (ARM M4)</span></div>
+                    <div class="spec-line"><span class="spec-key">connettività</span><span class="spec-val yellow">"WiFi 802.11 b/g/n"</span></div>
+                    <div class="spec-line"><span class="spec-key">montaggio</span><span class="spec-val orange">"Breadboard (no saldatura)"</span></div>
+                    <div class="spec-line"><span class="spec-key">sensori</span><span class="spec-val green">"Capacitivi umidità ×3"</span></div>
+                    <div class="spec-line"><span class="spec-key">sensore_temp</span><span class="spec-val">"DHT22 (aria)"</span></div>
+                    <div class="spec-line"><span class="spec-key">protocollo</span><span class="spec-val yellow">"MQTT over TCP/IP"</span></div>
+                    <div class="spec-line"><span class="spec-key">firmware_lang</span><span class="spec-val">"C++ (Arduino IDE)"</span></div>
+                    <div class="spec-line"><span class="spec-key">alimentazione</span><span class="spec-val orange">"USB 5V (banco lab)"</span></div>
+                    <div class="spec-line"><span class="spec-key">costo_totale</span><span class="spec-val green">"€ 85,00"</span></div>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <h4 class="fw-bold mb-4" style="color:var(--dark-green)">Cosa abbiamo dimostrato</h4>
+                <p class="text-muted mb-4">Il prototipo ha avuto un unico obiettivo: dimostrare che l'intera catena di comunicazione funziona — dal sensore nel terreno fino alla dashboard web. Nessun vincolo estetico, nessun incapsulamento: solo elettronica allo scoperto e codice che gira.</p>
+
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background:rgba(32,201,151,0.08);border:1px solid rgba(32,201,151,0.2);">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <strong style="font-size:0.88rem;color:var(--dark-green)">Lettura sensori OK</strong>
+                            <p class="text-muted mb-0 mt-1" style="font-size:0.8rem;">Valori ADC convertiti in % di umidità con calibrazione manuale su suoli iblei.</p>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background:rgba(32,201,151,0.08);border:1px solid rgba(32,201,151,0.2);">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <strong style="font-size:0.88rem;color:var(--dark-green)">Publish MQTT OK</strong>
+                            <p class="text-muted mb-0 mt-1" style="font-size:0.8rem;">Dati inviati ogni 30 secondi al broker Mosquitto su server Node.js locale.</p>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background:rgba(32,201,151,0.08);border:1px solid rgba(32,201,151,0.2);">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <strong style="font-size:0.88rem;color:var(--dark-green)">Persistenza DB OK</strong>
+                            <p class="text-muted mb-0 mt-1" style="font-size:0.8rem;">Node.js subscribe e salva ogni lettura su PostgreSQL con timestamp ISO.</p>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background:rgba(32,201,151,0.08);border:1px solid rgba(32,201,151,0.2);">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <strong style="font-size:0.88rem;color:var(--dark-green)">Dashboard Live OK</strong>
+                            <p class="text-muted mb-0 mt-1" style="font-size:0.8rem;">Grafico real-time con aggiornamento via WebSocket visibile da smartphone.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SEZIONE 2: LISTA COMPONENTI -->
+<section style="background:white;">
+    <div class="container">
+        <h2 class="section-title">Componenti Hardware</h2>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="hw-item c-green">
+                    <div class="hw-icon g"><i class="bi bi-cpu-fill"></i></div>
+                    <div class="hw-body">
+                        <h5>Arduino UNO R4 WiFi</h5>
+                        <p>Microcontrollore principale con WiFi integrato. Raccoglie i dati analogici dai sensori e gestisce la connessione MQTT.</p>
+                        <span class="hw-badge bg-success bg-opacity-10 text-success">Microcontrollore</span>
+                        <span class="hw-badge bg-secondary bg-opacity-10 text-secondary ms-1">~ €27,00</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="hw-item c-blue">
+                    <div class="hw-icon b"><i class="bi bi-moisture"></i></div>
+                    <div class="hw-body">
+                        <h5>Sensori Capacitivi Umidità ×3</h5>
+                        <p>Sensori capacitivi resistenti alla corrosione (preferiti agli resistivi). Misurano l'umidità volumetrica del suolo su 3 nodi distinti.</p>
+                        <span class="hw-badge bg-primary bg-opacity-10 text-primary">Sensore Suolo</span>
+                        <span class="hw-badge bg-secondary bg-opacity-10 text-secondary ms-1">~ €15,00</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="hw-item c-yellow">
+                    <div class="hw-icon y"><i class="bi bi-thermometer-half"></i></div>
+                    <div class="hw-body">
+                        <h5>Sensore DHT22</h5>
+                        <p>Rilevazione di temperatura e umidità relativa dell'aria. Dati integrati nel payload MQTT per il contesto ambientale della lettura.</p>
+                        <span class="hw-badge bg-warning bg-opacity-10 text-warning">Sensore Aria</span>
+                        <span class="hw-badge bg-secondary bg-opacity-10 text-secondary ms-1">~ €8,00</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="hw-item c-red">
+                    <div class="hw-icon r"><i class="bi bi-tools"></i></div>
+                    <div class="hw-body">
+                        <h5>Breadboard, cavi e alimentatore</h5>
+                        <p>Montaggio su breadboard senza saldatura per prototipazione rapida e modificabile. Alimentazione da USB da banco di laboratorio.</p>
+                        <span class="hw-badge bg-danger bg-opacity-10 text-danger">Cablaggio</span>
+                        <span class="hw-badge bg-secondary bg-opacity-10 text-secondary ms-1">~ €12,00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SEZIONE 3: TIMELINE SVILUPPO + COSTO -->
+<section style="background:#f8fbf9;">
+    <div class="container">
+        <div class="row g-5 align-items-start">
+            <div class="col-lg-6">
+                <h2 class="section-title text-start" style="text-align:left!important;margin-bottom:40px;">
+                    Come è nato<br><span style="color:var(--primary-green)">in laboratorio</span>
+                </h2>
+                <div class="timeline">
+                    <div class="tl-item">
+                        <div class="tl-dot"></div>
+                        <div class="tl-content">
+                            <h6><span class="tl-tag">Step 1</span>Ricerca Componenti</h6>
+                            <p>Confronto tra piattaforme (ESP32, Raspberry Pico W, Arduino R4). Scelta dell'Arduino R4 per la semplicità dell'IDE e il WiFi integrato.</p>
+                        </div>
+                    </div>
+                    <div class="tl-item">
+                        <div class="tl-dot"></div>
+                        <div class="tl-content">
+                            <h6><span class="tl-tag">Step 2</span>Firmware C++</h6>
+                            <p>Scrittura del codice di acquisizione ADC, normalizzazione in percentuale, e publish sul topic MQTT <code>ibleocare/node/1/data</code>.</p>
+                        </div>
+                    </div>
+                    <div class="tl-item">
+                        <div class="tl-dot"></div>
+                        <div class="tl-content">
+                            <h6><span class="tl-tag">Step 3</span>Backend Node.js</h6>
+                            <p>Setup di Mosquitto broker + server Express. Subscribe MQTT, parsing del payload JSON e persistenza su PostgreSQL locale.</p>
+                        </div>
+                    </div>
+                    <div class="tl-item">
+                        <div class="tl-dot"></div>
+                        <div class="tl-content">
+                            <h6><span class="tl-tag">Step 4</span>Test sul Campo</h6>
+                            <p>Sensori piantati in un vaso da 20cm con terra iblea. Verifica della curva di asciugatura nell'arco di 48 ore con grafici live.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <h2 class="section-title text-start" style="text-align:left!important;margin-bottom:40px;">
+                    Il Costo del<br><span style="color:var(--primary-green)">Prototipo (Fase 1)</span>
+                </h2>
+                <div class="cost-card">
+                    <div class="mb-2" style="color:rgba(255,255,255,0.5);font-size:0.85rem;text-transform:uppercase;letter-spacing:2px;">Investimento Totale</div>
+                    <div class="cost-amount">€ 85</div>
+                    <div class="mb-4" style="color:rgba(51, 18, 18, 0.4);font-size:0.9rem;">,00</div>
+                    <p class="opacity-40 mb-4">Un singolo nodo funzionante, con 3 sensori, il microcontrollore, i cavi e tutto il necessario per dimostrare la fattibilità tecnica del sistema.</p>
+                    <div class="row g-2 text-start">
+                        <div class="col-6">
+                            <div class="p-3 rounded-3" style="background:rgba(255,255,255,0.07);">
+                                <div style="color:var(--primary-green);font-size:1.2rem;font-weight:800;">€ 27</div>
+                                <div style="color:rgba(255,255,255,0.5);font-size:0.75rem;">Arduino UNO R4</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 rounded-3" style="background:rgba(255,255,255,0.07);">
+                                <div style="color:var(--primary-green);font-size:1.2rem;font-weight:800;">€ 15</div>
+                                <div style="color:rgba(255,255,255,0.5);font-size:0.75rem;">Sensori capacitivi ×3</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 rounded-3" style="background:rgba(255,255,255,0.07);">
+                                <div style="color:var(--primary-green);font-size:1.2rem;font-weight:800;">€ 8</div>
+                                <div style="color:rgba(255,255,255,0.5);font-size:0.75rem;">DHT22 + resistenze</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 rounded-3" style="background:rgba(255,255,255,0.07);">
+                                <div style="color:var(--primary-green);font-size:1.2rem;font-weight:800;">€ 35</div>
+                                <div style="color:rgba(255,255,255,0.5);font-size:0.75rem;">Breadboard, cavi, misc.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section py-5">
+    <div class="container text-white text-center py-3">
+        <h2 class="fw-bold mb-3">Prototipo validato. E ora?</h2>
+        <p class="opacity-75 mb-4 fs-5">Il passo successivo è la miniaturizzazione su PCB custom per il prodotto di mercato.</p>
+        <a href="progetto-prodotto-finito.html" class="btn btn-success btn-lg rounded-pill px-5 fw-bold shadow-sm me-3">
+            Prodotto Finito <i class="bi bi-arrow-right ms-2"></i>
+        </a>
+        <a href="business-prezzi.html" class="btn btn-outline-light btn-lg rounded-pill px-5 fw-bold mt-2 mt-sm-0">
+            Analisi Costi &amp; Prezzi
+        </a>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-dark text-white py-5 border-top border-success border-5">
+    <div class="container text-center text-md-start">
+        <div class="row g-4 align-items-center">
+            <div class="col-md-4 text-center text-md-start">
+                <h3 class="fw-bold text-success mb-2">🌿 IbleoCare</h3>
+                <p class="small opacity-50 mb-0">L'IoT che rispetta la natura.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <a href="/login.html" class="btn btn-outline-success rounded-pill px-4">Accesso Portale Privato</a>
+            </div>
+            <div class="col-md-4 text-center text-md-end">
+                <p class="mb-0 small opacity-50">&copy; 2026 IbleoCare Project.<br>Team JA Italia.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

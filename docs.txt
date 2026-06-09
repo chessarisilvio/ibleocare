@@ -1,0 +1,416 @@
+================================================================================
+  IbleoCare — Sistema IoT Monitor Piante
+  Documentazione completa — Pipeline, architettura, configurazione
+  Silvio Chessari — 2026
+================================================================================
+
+--------------------------------------------------------------------------------
+1. ARCHITETTURA GENERALE
+--------------------------------------------------------------------------------
+
+  [Arduino UNO R4 WiFi]
+       |  WiFi LAN
+       |  MQTT publish ogni 5s
+       v
+  [Broker Mosquitto]  ← 192.168.1.151:1883
+       |  subscribe pianta/+/data
+       v
+  [Node.js Backend]   ← Express + Socket.IO + MQTT client
+       |
+       +-- salva su PostgreSQL (letture_raw, medie orarie/giornaliere)
+       |
+       +-- emette via Socket.IO → browser in tempo reale
+       |
+       +-- calcola medie (cron orario/giornaliero)
+       |
+       +-- invia Web Push Chrome se suolo < soglia allarme
+       |
+       v
+  [Browser / Telefono]   ← http://IP_PUBBLICO:3000
+       - Chart.js grafici live + storici
+       - Socket.IO aggiornamenti real-time
+       - Web Push API notifiche Chrome
+
+--------------------------------------------------------------------------------
+2. COMPONENTI HARDWARE
+--------------------------------------------------------------------------------
+
+  Arduino UNO R4 WiFi
+    - DHT22           → pin D4   (temperatura e umidità aria)
+    - Sensore suolo   → pin A0   (umidità terreno, lettura analogica 10-bit)
+    - OLED SSD1306    → I2C 0x3C (display 128x64)
+    - LED verde       → pin D7
+    - LED giallo      → pin D6
+    - LED rosso       → pin D5
+    - Pulsante 1      → pin D8  (pagina QR setup)
+    - Pulsante 2      → pin D9  (info WiFi)
+    - Pulsante 3      → pin D10 (stato suolo)
+    - Pulsante 4      → pin D11 (interfaccia tecnica)
+
+--------------------------------------------------------------------------------
+3. TOPIC MQTT
+--------------------------------------------------------------------------------
+
+  Publish (Arduino → Broker):
+    Topic:   pianta/nodo{ID}/data
+    Esempio: pianta/nodo1/data
+    Payload JSON:
+      {"id":1,"temp":23.4,"hum":65.2,"soil":72}
+
+    Campi:
+      id   = ID numerico del nodo (1, 2, 3 ...)
+      temp = temperatura in °C (float, 0.0 se DHT22 in errore)
+      hum  = umidità aria in % (float, 0.0 se DHT22 in errore)
+      soil = umidità suolo in % (int 0-100)
+
+  Subscribe (Backend → Broker):
+    Topic:   pianta/+/data   (wildcard: tutti i nodi)
+
+  Frequenza: ogni 5 secondi per nodo
+  Broker:    Mosquitto, 192.168.1.151:1883, anonimo, tutte le interfacce
+
+--------------------------------------------------------------------------------
+4. CONFIGURAZIONE ARDUINO (.ino)
+--------------------------------------------------------------------------------
+
+  File: /home/debian/Scrivania/linux/arduinoide/esphumidity/
+        piantswebs_touch30s/piantswebs_touch30s.ino
+
+  Costanti MQTT (da modificare per nodi successivi):
+    MQTT_BROKER           = "192.168.1.151"   ← IP del PC server
+    MQTT_PORT             = 1883
+    MQTT_NODE_ID          = 1                 ← cambia per ogni nodo (2, 3...)
+    MQTT_PUBLISH_INTERVAL = 5000              ← ms tra pubblicazioni
+
+  Librerie necessarie (Library Manager):
+    - DHT sensor library + Adafruit Unified Sensor
+    - Adafruit SSD1306 + Adafruit GFX Library
+    - PubSubClient (già installata)
+    - WiFiS3 (built-in core Renesas)
+
+  Per aggiungere un nuovo nodo:
+    1. Duplica la cartella del progetto
+    2. Cambia MQTT_NODE_ID = 2 (o 3, 4 ...)
+    3. Compila e carica sul nuovo Arduino
+
+  Compilazione:
+    arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi \
+      /home/debian/Scrivania/linux/arduinoide/esphumidity/piantswebs_touch30s/
+
+  Upload (con Arduino connesso via USB su /dev/ttyACM0):
+    arduino-cli upload --fqbn arduino:renesas_uno:unor4wifi \
+      --port /dev/ttyACM0 \
+      /home/debian/Scrivania/linux/arduinoide/esphumidity/piantswebs_touch30s/
+
+--------------------------------------------------------------------------------
+5. CONFIGURAZIONE BROKER MOSQUITTO
+--------------------------------------------------------------------------------
+
+  File: /etc/mosquitto/conf.d/local.conf
+  Contenuto attuale:
+    listener 1883
+    allow_anonymous true
+
+  Stato: attivo (systemctl is-active mosquitto → active)
+  Log:   /var/log/mosquitto/mosquitto.log
+
+  Verifica funzionamento:
+    mosquitto_sub -h 192.168.1.151 -t "pianta/+/data" -v
+
+--------------------------------------------------------------------------------
+6. POSTGRESQL
+--------------------------------------------------------------------------------
+
+  Versione: PostgreSQL 17 (Debian 13)
+  Cluster:  main, porta 5432
+  Database: iot_piante
+  Utente:   iot_user  /  password: iot_pass_2026
+
+  Tabelle:
+    nodi               — registro nodi IoT (id, nome, soglia_allarme, ultimo stato)
+    letture_raw        — dati grezzi ogni 5s, tenuti 10 giorni
+    medie_orarie       — medie calcolate ogni ora (cron 01 di ogni ora)
+    medie_giornaliere  — medie calcolate ogni giorno (cron 00:05)
+    push_subscriptions — iscrizioni Web Push Chrome
+
+  Pulizia automatica:
+    Cron alle 00:30 → elimina letture_raw più vecchie di 10 giorni
+
+  Script SQL inizializzazione:
+    /tmp/iot_piante_init.sql
+    Comando: sudo -u postgres psql -f /tmp/iot_piante_init.sql
+
+  Accesso diretto:
+    psql postgresql://iot_user:iot_pass_2026@localhost:5432/iot_piante
+
+--------------------------------------------------------------------------------
+7. NODE.JS BACKEND
+--------------------------------------------------------------------------------
+
+  Path:    /home/debian/Scrivania/iot-server/
+  Entry:   index.js
+  Porta:   3000
+
+  Struttura file:
+    index.js          → boot: Express + Socket.IO + MQTT + cron
+    db.js             → pool PostgreSQL
+    mqtt.js           → subscriber MQTT, salvataggio DB, emit Socket.IO, push allarmi
+    cron.js           → scheduler medie orarie/giornaliere + pulizia
+    push-sender.js    → configurazione web-push con chiavi VAPID
+    routes/api.js     → REST API
+    routes/push.js    → registrazione/rimozione push subscriptions
+    public/           → frontend statico servito da Express
+    .env              → variabili d'ambiente
+
+  Dipendenze npm:
+    express, socket.io, mqtt, pg, node-cron, web-push, dotenv
+
+  Avvio:
+    cd /home/debian/Scrivania/iot-server
+    node index.js
+
+  Per avvio automatico al boot (systemd):
+    sudo nano /etc/systemd/system/iot-server.service
+    [vedere sezione 11]
+
+--------------------------------------------------------------------------------
+8. REST API
+--------------------------------------------------------------------------------
+
+  Base URL: http://192.168.1.151:3000
+
+  GET  /api/nodi
+       → lista tutti i nodi con ultimo stato live
+       Risposta: [{ id, nome, tipo_pianta, soglia_allarme, ultimo_temp, ... }]
+
+  GET  /api/nodo/:id/live
+       → ultimo dato live di un nodo
+       Risposta: { ts, temp, hum, soil }
+
+  GET  /api/nodo/:id/raw?n=60
+       → ultime N letture grezze (default 60, max 1000)
+       Risposta: [{ ts, temp, hum, soil }, ...]
+
+  GET  /api/nodo/:id/orarie?n=24
+       → ultime N medie orarie (default 24, max 240)
+       Risposta: [{ ora, temp_media, hum_media, soil_media, campioni }, ...]
+
+  GET  /api/nodo/:id/giornaliere?n=10
+       → ultimi N giorni medie (default 10, max 30)
+       Risposta: [{ giorno, temp_media, hum_media, soil_media, campioni }, ...]
+
+  GET  /api/vapid-public
+       → chiave pubblica VAPID per il frontend push
+       Risposta: { publicKey: "..." }
+
+  POST /api/push/subscribe
+       → registra subscription push Chrome
+       Body: { nodo_id, subscription: { endpoint, keys: { p256dh, auth } } }
+
+  DELETE /api/push/unsubscribe
+       → rimuove subscription
+       Body: { endpoint }
+
+--------------------------------------------------------------------------------
+9. SOCKET.IO — EVENTI REAL-TIME
+--------------------------------------------------------------------------------
+
+  Server → Client:
+    evento:  "sensor_data"
+    payload: { id, temp, hum, soil, ts }
+    Emesso ogni volta che il backend riceve un dato MQTT da qualsiasi nodo.
+    Il frontend filtra per nodo attivo selezionato.
+
+--------------------------------------------------------------------------------
+10. WEB PUSH — NOTIFICHE CHROME
+--------------------------------------------------------------------------------
+
+  Standard: Web Push API + VAPID
+  Service Worker: /public/sw.js
+  Chiavi VAPID generate una sola volta, salvate in .env:
+    VAPID_PUBLIC_KEY  = BJ2JFPHgSQFAUVhygWxDcdTLusVNCx-...
+    VAPID_PRIVATE_KEY = fjtm2-7CU0-QvuPW-QLl68OfQETq...
+
+  IMPORTANTE: le chiavi VAPID non vanno mai cambiate dopo il primo deploy.
+  Se le cambi, tutti i browser già iscritti perdono le notifiche.
+
+  Trigger allarme:
+    Quando suolo < soglia_allarme del nodo (default 33%)
+    Una sola notifica per evento (non spam: aspetta che risalga sopra soglia)
+
+  Requisiti browser:
+    - Chrome (Android o Desktop) con notifiche abilitate
+    - La pagina deve essere servita su HTTPS oppure localhost
+    ATTENZIONE: da rete esterna (4G) con IP pubblico puro (http://),
+    Chrome blocca i Service Worker. Serve HTTPS.
+    Soluzione: usa un reverse proxy nginx con certificato Let's Encrypt
+    (vedere sezione 12) oppure Cloudflare Tunnel (non richiede port forwarding).
+
+--------------------------------------------------------------------------------
+11. PORT FORWARDING — ACCESSO DA FUORI CASA
+--------------------------------------------------------------------------------
+
+  Obiettivo: raggiungere la dashboard da telefono 4G/5G.
+
+  IP PC server (LAN): 192.168.1.151
+  Porta dashboard:    3000
+
+  Configurazione router:
+    Protocollo: TCP
+    Porta esterna (WAN): 3000   (o altra a scelta)
+    IP destinazione (LAN): 192.168.1.151
+    Porta destinazione:    3000
+
+  Accesso da telefono:
+    http://TUO_IP_PUBBLICO:3000
+
+  Per trovare il tuo IP pubblico:
+    curl ifconfig.me
+
+  NOTA: Con HTTP puro (non HTTPS), le notifiche push Chrome non funzionano
+  da rete esterna. Per attivare HTTPS vedere sezione 12.
+
+--------------------------------------------------------------------------------
+12. HTTPS CON NGINX + LET'S ENCRYPT (opzionale, per push da esterno)
+--------------------------------------------------------------------------------
+
+  Prerequisiti:
+    - Dominio puntato al tuo IP pubblico (es. piante.tuodominio.it)
+    - Port forwarding 80 e 443 verso 192.168.1.151
+
+  Installazione:
+    sudo apt install nginx certbot python3-certbot-nginx
+    sudo certbot --nginx -d piante.tuodominio.it
+
+  Configurazione nginx /etc/nginx/sites-available/iot:
+    server {
+      listen 443 ssl;
+      server_name piante.tuodominio.it;
+      location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+      }
+    }
+
+  Attivazione:
+    sudo ln -s /etc/nginx/sites-available/iot /etc/nginx/sites-enabled/
+    sudo systemctl reload nginx
+
+--------------------------------------------------------------------------------
+13. SYSTEMD — AVVIO AUTOMATICO AL BOOT
+--------------------------------------------------------------------------------
+
+  Crea file: /etc/systemd/system/iot-server.service
+
+    [Unit]
+    Description=IbleoCare IoT Server
+    After=network.target postgresql.service mosquitto.service
+
+    [Service]
+    Type=simple
+    User=debian
+    WorkingDirectory=/home/debian/Scrivania/iot-server
+    ExecStart=/home/debian/.config/nvm/versions/node/v22.22.0/bin/node index.js
+    Restart=on-failure
+    RestartSec=5
+
+    [Install]
+    WantedBy=multi-user.target
+
+  Attivazione:
+    sudo systemctl daemon-reload
+    sudo systemctl enable iot-server
+    sudo systemctl start iot-server
+    sudo systemctl status iot-server
+
+--------------------------------------------------------------------------------
+14. PROCEDURA PRIMO AVVIO COMPLETA
+--------------------------------------------------------------------------------
+
+  1. Inizializza il database PostgreSQL:
+     sudo -u postgres psql -f /tmp/iot_piante_init.sql
+
+  2. Avvia il backend Node.js:
+     cd /home/debian/Scrivania/iot-server
+     node index.js
+
+  3. Verifica che il broker Mosquitto sia attivo:
+     systemctl status mosquitto
+
+  4. Apri http://192.168.1.151:3000 sul browser locale
+     (la dashboard deve caricarsi anche senza Arduino collegato)
+
+  5. Carica il firmware sull'Arduino:
+     arduino-cli upload --fqbn arduino:renesas_uno:unor4wifi \
+       --port /dev/ttyACM0 \
+       /home/debian/Scrivania/linux/arduinoide/esphumidity/piantswebs_touch30s/
+
+  6. Configura il WiFi sull'Arduino (primo avvio):
+     - L'Arduino crea la rete "PiantaSetup" / "pianta123"
+     - Collegati con il telefono e vai su http://192.168.4.1
+     - Inserisci SSID e password del WiFi di casa
+
+  7. Verifica ricezione dati MQTT:
+     mosquitto_sub -h 192.168.1.151 -t "pianta/+/data" -v
+
+  8. Configura port forwarding sul router (porta 3000 → 192.168.1.151:3000)
+
+  9. Accedi da telefono 4G:
+     http://TUO_IP_PUBBLICO:3000
+
+  10. Attiva notifiche push Chrome:
+      - Apri la dashboard nel browser Chrome
+      - Premi il pulsante "Attiva notifiche"
+      - Accetta il permesso
+
+--------------------------------------------------------------------------------
+15. AGGIUNTA DI UN NUOVO NODO
+--------------------------------------------------------------------------------
+
+  1. Duplica la cartella del progetto Arduino
+  2. Modifica la costante: MQTT_NODE_ID = 2  (o 3, 4...)
+  3. Compila e carica sul nuovo Arduino
+  4. Il backend lo registra automaticamente al primo messaggio MQTT ricevuto
+  5. La dashboard mostra il nuovo nodo nel menu a tendina
+
+--------------------------------------------------------------------------------
+16. STRUTTURA FILE PROGETTO
+--------------------------------------------------------------------------------
+
+  ARDUINO:
+  /home/debian/Scrivania/linux/arduinoide/esphumidity/
+  └── piantswebs_touch30s/
+      └── piantswebs_touch30s.ino   (firmware nodo1)
+
+  BACKEND + FRONTEND:
+  /home/debian/Scrivania/iot-server/
+  ├── index.js          → entry point (Express + Socket.IO + boot)
+  ├── db.js             → pool PostgreSQL
+  ├── mqtt.js           → subscriber MQTT + allarmi push
+  ├── cron.js           → medie orarie/giornaliere + pulizia
+  ├── push-sender.js    → configurazione web-push VAPID
+  ├── .env              → variabili d'ambiente (DB, MQTT, VAPID, PORT)
+  ├── package.json
+  ├── routes/
+  │   ├── api.js        → REST API dati sensori
+  │   └── push.js       → gestione iscrizioni Web Push
+  └── public/
+      ├── index.html    → dashboard SPA
+      ├── app.js        → Chart.js + Socket.IO + Web Push client
+      ├── style.css     → tema scuro
+      └── sw.js         → Service Worker (push notifications)
+
+  BROKER:
+  Mosquitto — /etc/mosquitto/conf.d/local.conf
+  Log       — /var/log/mosquitto/mosquitto.log
+
+  DATABASE:
+  PostgreSQL 17 — database: iot_piante
+  Tabelle: nodi, letture_raw, medie_orarie, medie_giornaliere, push_subscriptions
+
+================================================================================
+  Fine documentazione — IbleoCare IoT v1.0
+================================================================================

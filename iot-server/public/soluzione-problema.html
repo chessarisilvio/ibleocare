@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il Problema — IbleoCare</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root { --primary-green: #20c997; --dark-green: #0a2e1c; --earth-brown: #8B4513; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; scroll-behavior: smooth; background-color: #f8fbf9; padding-top: 80px; }
+        .navbar { background: rgba(10, 46, 28, 0.97) !important; position: fixed; top: 0; width: 100%; z-index: 1000; padding-top: 10px; padding-bottom: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.3); transition: padding 0.3s; }
+        .nav-link { color: rgba(255,255,255,0.9) !important; font-weight: 500; font-size: 1.05rem; margin: 0 3px; transition: color 0.3s; }
+        .nav-link:hover, .nav-link:focus { color: var(--primary-green) !important; }
+        .dropdown-menu { background-color: rgba(10, 46, 28, 0.97); border: 1px solid rgba(32, 201, 151, 0.2); backdrop-filter: blur(10px); }
+        .dropdown-item { color: white; transition: background 0.2s, padding-left 0.2s; }
+        .dropdown-item:hover { background-color: rgba(32, 201, 151, 0.2); color: var(--primary-green); padding-left: 20px; }
+        .offcanvas-end { background-color: var(--dark-green); color: white; border-left: 4px solid var(--primary-green); }
+        .navbar-toggler { border: none; box-shadow: none !important; }
+        .navbar-toggler-icon { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e"); }
+        .page-hero { padding: 60px 0 50px 0; color: white; position: relative; overflow: hidden; }
+        .page-hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--dark-green) 0%, #0d4a2a 100%); z-index: 0; }
+        .page-hero .container { position: relative; z-index: 1; }
+        .section-title { font-weight: 800; position: relative; margin-bottom: 60px; text-align: center; color: var(--dark-green); text-transform: uppercase; letter-spacing: 2px; }
+        .section-title::after { content: ''; width: 80px; height: 4px; background: var(--primary-green); position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); border-radius: 2px; }
+        section { padding: 80px 0; }
+        .card-custom { border: none; transition: transform 0.3s, box-shadow 0.3s; border-radius: 15px; overflow: hidden; }
+        .card-custom:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        .step-box { border-left: 4px solid var(--primary-green); padding: 20px 25px; margin-bottom: 25px; background: white; border-radius: 0 12px 12px 0; box-shadow: 0 3px 15px rgba(0,0,0,0.06); }
+        .breadcrumb-item a { color: var(--primary-green); text-decoration: none; }
+        .breadcrumb-item.active { color: rgba(255,255,255,0.7); }
+        .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.4); }
+        .tech-card { border-radius: 16px; border: none; box-shadow: 0 5px 25px rgba(0,0,0,0.08); transition: transform 0.3s, box-shadow 0.3s; }
+        .tech-card:hover { transform: translateY(-6px); box-shadow: 0 15px 35px rgba(0,0,0,0.12); }
+        .flow-step { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.07); position: relative; text-align: center; }
+        .flow-step .step-number { width: 50px; height: 50px; border-radius: 50%; background: var(--primary-green); color: white; font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+        .flow-arrow { display: flex; align-items: center; justify-content: center; color: var(--primary-green); font-size: 1.8rem; }
+        .stat-block { background: var(--dark-green); color: white; border-radius: 16px; padding: 35px 20px; text-align: center; border-bottom: 5px solid var(--primary-green); transition: transform 0.3s; }
+        .stat-block:hover { transform: translateY(-5px); }
+        .stat-block .stat-number { font-size: 3rem; font-weight: 900; color: var(--primary-green); line-height: 1; }
+        .stat-block .stat-label { font-size: 0.9rem; opacity: 0.85; margin-top: 10px; }
+        .schema-row { display: flex; align-items: center; padding: 12px 16px; border-radius: 8px; margin-bottom: 8px; }
+        .cta-section { background: var(--dark-green); }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark" id="mainNav">
+    <div class="container-fluid px-4 px-lg-5">
+        <a class="navbar-brand" href="index.html">
+            <img src="icon.svg" alt="Logo IbleoCare" height="60" style="filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5));">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+            <div class="offcanvas-header border-bottom border-success border-opacity-25 p-4">
+                <h5 class="offcanvas-title fw-bold text-success" id="offcanvasNavbarLabel"><i class="bi bi-tree-fill me-2"></i>IbleoCare</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <ul class="navbar-nav justify-content-end align-items-lg-center flex-grow-1 pe-3 gap-2">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Il Progetto</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="progetto-descrizione.html">Descrizione Generale</a></li>
+                            <li><a class="dropdown-item" href="progetto-mission.html">Mission &amp; Obiettivi</a></li>
+                            <li><a class="dropdown-item" href="progetto-prototipo.html">Prototipo Arduino R4</a></li>
+                            <li><a class="dropdown-item" href="progetto-prodotto-finito.html">Prodotto Finito PCB</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">La Soluzione</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="soluzione-problema.html">Il Problema</a></li>
+                            <li><a class="dropdown-item" href="soluzione-funzionamento.html">Come Funziona</a></li>
+                            <li><a class="dropdown-item" href="soluzione-tecnologie.html">Tecnologie &amp; Componenti</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Business</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="business-valore.html">Value Proposition</a></li>
+                            <li><a class="dropdown-item" href="business-mercato.html">Mercato</a></li>
+                            <li><a class="dropdown-item" href="business-prezzi.html">Costi e Prezzi</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#chisiamo">Chi Siamo</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#contatti">Contatti</a></li>
+                    <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
+                        <a href="/login.html" class="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm w-100">
+                            <i class="bi bi-lock-fill me-1"></i> Area Privata
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item"><a href="#">La Soluzione</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Il Problema</li>
+            </ol>
+        </nav>
+        <span class="badge bg-success fs-6 mb-3 px-3 py-2">La Soluzione</span>
+        <h1 class="display-4 fw-black mb-3">Un Problema Globale Urgente</h1>
+        <p class="lead opacity-85 mb-0" style="max-width: 600px;">Lo spreco d'acqua e la mortalità delle piante: dati e cause</p>
+    </div>
+</div>
+
+<!-- SECTION 1: I NUMERI DEL DISASTRO -->
+<section style="background-color: #f8fbf9;">
+    <div class="container">
+        <h2 class="section-title">La Crisi Idrica in Agricoltura</h2>
+
+        <div class="row g-4 mb-5">
+            <div class="col-6 col-md-3">
+                <div class="stat-block h-100">
+                    <div class="stat-number">70%</div>
+                    <div class="stat-label">Acqua dolce mondiale consumata dall'agricoltura</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-block h-100">
+                    <div class="stat-number">40%</div>
+                    <div class="stat-label">Di questa acqua viene sprecata per irrigazioni mal gestite</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-block h-100">
+                    <div class="stat-number">1.2 Mld</div>
+                    <div class="stat-label">Ettari di terra agricola nel mondo</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-block h-100">
+                    <div class="stat-number">€ 8 Mld</div>
+                    <div class="stat-label">Perdite annue da mortalità colture in Europa</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <p class="lead text-center" style="color: #444; line-height: 1.8;">
+                    In un pianeta dove l'acqua dolce è una risorsa sempre più scarsa, l'agricoltura ne consuma il <strong>70% a livello globale</strong>. Peggio ancora, una quota stimata al 40% di quest'acqua viene sprecata per irrigazioni eccessive, mal temporizzate o semplicemente non necessarie.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 2: L'ASFISSIA RADICALE -->
+<section style="background-color: white;">
+    <div class="container">
+        <h2 class="section-title">La Causa Silenziosa di Morte delle Piante</h2>
+
+        <div class="row g-5 align-items-start">
+            <!-- Colonna sinistra: testo -->
+            <div class="col-lg-6">
+                <p class="fs-5 mb-4" style="color: #444; line-height: 1.8;">
+                    L'<strong>asfissia radicale</strong> è una delle principali cause di morte delle piante coltivate. Avviene quando il terreno è costantemente saturo d'acqua, impedendo alle radici di ricevere l'ossigeno necessario alla respirazione cellulare.
+                </p>
+
+                <h5 class="fw-bold mb-3" style="color: var(--dark-green);">Sintomi riconoscibili:</h5>
+                <ul class="list-unstyled mb-4">
+                    <li class="mb-2"><i class="bi bi-exclamation-triangle text-warning me-2"></i>Foglie gialle e appassite nonostante le innaffiature</li>
+                    <li class="mb-2"><i class="bi bi-exclamation-triangle text-warning me-2"></i>Radici marroni e putrefatte all'esame visivo</li>
+                    <li class="mb-2"><i class="bi bi-exclamation-triangle text-warning me-2"></i>Odore di marcio dal terreno o dal vaso</li>
+                    <li class="mb-2"><i class="bi bi-exclamation-triangle text-warning me-2"></i>Crescita bloccata o arresto vegetativo improvviso</li>
+                </ul>
+
+                <div class="p-4 rounded-3" style="background: #fff8e1; border-left: 5px solid #f59e0b;">
+                    <p class="mb-0 fst-italic" style="color: #78350f;">
+                        "Il paradosso è evidente: l'agricoltore annaffia credendo di aiutare la pianta, ma in realtà la sta soffocando."
+                    </p>
+                </div>
+            </div>
+
+            <!-- Colonna destra: schema comparativo -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 p-4" style="background: #fffde7;">
+                    <h5 class="fw-bold mb-4 text-dark text-center"><i class="bi bi-bar-chart-fill me-2 text-success"></i>Schema Comparativo: Stato del Suolo</h5>
+
+                    <!-- Suolo Sano -->
+                    <div class="schema-row mb-3" style="background: #d1fae5; border-left: 4px solid #10b981;">
+                        <div class="me-3">
+                            <span class="badge bg-success fs-6 px-3 py-2">SANO</span>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-success">Suolo Sano</div>
+                            <div class="small text-muted">Umidità 40–60% &bull; Ossigeno disponibile &bull; Radici attive</div>
+                            <div class="mt-1">
+                                <div class="progress" style="height:8px;">
+                                    <div class="progress-bar bg-success" style="width:55%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Suolo Saturo -->
+                    <div class="schema-row mb-3" style="background: #fee2e2; border-left: 4px solid #ef4444;">
+                        <div class="me-3">
+                            <span class="badge bg-danger fs-6 px-3 py-2">CRITICO</span>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-danger">Suolo Saturo</div>
+                            <div class="small text-muted">Umidità 90–100% &bull; Ossigeno assente &bull; Radici in asfissia</div>
+                            <div class="mt-1">
+                                <div class="progress" style="height:8px;">
+                                    <div class="progress-bar bg-danger" style="width:95%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Suolo Secco -->
+                    <div class="schema-row" style="background: #ffedd5; border-left: 4px solid #f97316;">
+                        <div class="me-3">
+                            <span class="badge bg-warning text-dark fs-6 px-3 py-2">STRESS</span>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-warning">Suolo Secco</div>
+                            <div class="small text-muted">Umidità &lt;20% &bull; Stress idrico &bull; Radici in siccità</div>
+                            <div class="mt-1">
+                                <div class="progress" style="height:8px;">
+                                    <div class="progress-bar bg-warning" style="width:15%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 3: IL PROBLEMA IN SICILIA -->
+<section style="background-color: #f8fbf9;">
+    <div class="container">
+        <h2 class="section-title">Il Contesto Locale: L'Area Iblea</h2>
+
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-9">
+                <p class="lead text-center" style="color: #444; line-height: 1.8;">
+                    La Sicilia è tra le regioni italiane con le maggiori sfide idriche. Le estati calde e secche, le piogge irregolari e la dipendenza dall'irrigazione manuale rendono l'<strong>area iblea</strong> (Ragusa e dintorni) un caso di studio perfetto per IbleoCare. Le colture locali — serre di pomodoro, carciofi, agrumi — soffrono sia per eccesso che per carenza idrica, spesso nella stessa stagione.
+                </p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Card: Siccità Estiva -->
+            <div class="col-md-4">
+                <div class="card card-custom h-100 shadow-sm border-0">
+                    <div class="card-body p-4 text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-sun" style="font-size: 3rem; color: #f97316;"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2" style="color: var(--dark-green);">Siccità Estiva</h5>
+                        <span class="badge bg-warning text-dark mb-3">Luglio – Settembre</span>
+                        <p class="text-muted mb-0">Temperature oltre i <strong>38°C</strong>, zero precipitazioni per settimane, rischio stress idrico critico per tutte le colture. L'evapostraspirazione supera ogni capacità di ritenzione idrica naturale del suolo.</p>
+                    </div>
+                    <div class="card-footer border-0" style="background: #fff3cd; border-radius: 0 0 15px 15px;">
+                        <small class="text-warning fw-bold"><i class="bi bi-exclamation-triangle me-1"></i>Alto rischio perdita colture</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Piogge Violente -->
+            <div class="col-md-4">
+                <div class="card card-custom h-100 shadow-sm border-0">
+                    <div class="card-body p-4 text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-cloud-rain" style="font-size: 3rem; color: #3b82f6;"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2" style="color: var(--dark-green);">Piogge Violente</h5>
+                        <span class="badge bg-primary mb-3">Autunno / Inverno</span>
+                        <p class="text-muted mb-0">Eventi meteorologici intensi capaci di saturare il terreno in <strong>poche ore</strong>. Il suolo argilloso tipico dell'area iblea trattiene l'acqua, creando condizioni di asfissia radicale prolungata dopo ogni pioggia intensa.</p>
+                    </div>
+                    <div class="card-footer border-0" style="background: #dbeafe; border-radius: 0 0 15px 15px;">
+                        <small class="text-primary fw-bold"><i class="bi bi-droplet me-1"></i>Saturazione improvvisa del suolo</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Gestione Manuale -->
+            <div class="col-md-4">
+                <div class="card card-custom h-100 shadow-sm border-0">
+                    <div class="card-body p-4 text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-person-x" style="font-size: 3rem; color: #6b7280;"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2" style="color: var(--dark-green);">Gestione Manuale</h5>
+                        <span class="badge bg-secondary mb-3">Problema Strutturale</span>
+                        <p class="text-muted mb-0">La maggior parte delle <strong>piccole aziende agricole siciliane</strong> irrigua ancora a calendario fisso, non a bisogno reale. Una pratica ereditata che ignora le variazioni climatiche giornaliere e le reali condizioni del suolo.</p>
+                    </div>
+                    <div class="card-footer border-0" style="background: #f3f4f6; border-radius: 0 0 15px 15px;">
+                        <small class="text-secondary fw-bold"><i class="bi bi-calendar-x me-1"></i>Irrigazione a calendario: metodo obsoleto</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 4: IBLEO CARE È LA RISPOSTA -->
+<section class="cta-section">
+    <div class="container text-center text-white py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <i class="bi bi-lightbulb-fill mb-4 d-block" style="font-size: 3.5rem; color: var(--primary-green);"></i>
+                <h2 class="display-5 fw-black mb-4">Basta con l'irrigazione a calendario.<br>Inizia quella scientifica.</h2>
+                <p class="lead mb-5 opacity-85">
+                    IbleoCare porta la misurazione in tempo reale dell'umidità del suolo direttamente alla tua dashboard, eliminando per sempre il dubbio <em>"devo annaffiare oggi?"</em>.
+                </p>
+                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                    <a href="soluzione-funzionamento.html" class="btn btn-success btn-lg rounded-pill px-5 fw-bold shadow-sm">
+                        Come Funziona <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                    <a href="soluzione-tecnologie.html" class="btn btn-outline-light btn-lg rounded-pill px-5 fw-bold">
+                        Vedi le Tecnologie <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-dark text-white py-5 border-top border-success border-5">
+    <div class="container text-center text-md-start">
+        <div class="row g-4 align-items-center">
+            <div class="col-md-4 text-center text-md-start">
+                <h3 class="fw-bold text-success mb-2">&#127807; IbleoCare</h3>
+                <p class="small opacity-50 mb-0">L'IoT che rispetta la natura.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <a href="/login.html" class="btn btn-outline-success rounded-pill px-4">Accesso Portale Privato</a>
+            </div>
+            <div class="col-md-4 text-center text-md-end">
+                <p class="mb-0 small opacity-50">&copy; 2026 IbleoCare Project.<br>Team JA Italia.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

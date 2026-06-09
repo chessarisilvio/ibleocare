@@ -1,0 +1,24 @@
+{
+  "name": "iot-server",
+  "version": "1.0.0",
+  "description": "IoT backend — Arduino UNO R4 WiFi / MQTT / PostgreSQL / Express",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": [],
+  "author": "Silvio Chessari",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "mqtt": "^5.15.1",
+    "node-cron": "^3.0.3",
+    "pg": "^8.20.0",
+    "socket.io": "^4.8.3",
+    "web-push": "^3.6.7"
+  }
+}

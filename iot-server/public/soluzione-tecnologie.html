@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tecnologie &amp; Componenti — IbleoCare</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root { --primary-green: #20c997; --dark-green: #0a2e1c; --earth-brown: #8B4513; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; scroll-behavior: smooth; background-color: #f8fbf9; padding-top: 80px; }
+        .navbar { background: rgba(10, 46, 28, 0.97) !important; position: fixed; top: 0; width: 100%; z-index: 1000; padding-top: 10px; padding-bottom: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.3); transition: padding 0.3s; }
+        .nav-link { color: rgba(255,255,255,0.9) !important; font-weight: 500; font-size: 1.05rem; margin: 0 3px; transition: color 0.3s; }
+        .nav-link:hover, .nav-link:focus { color: var(--primary-green) !important; }
+        .dropdown-menu { background-color: rgba(10, 46, 28, 0.97); border: 1px solid rgba(32, 201, 151, 0.2); backdrop-filter: blur(10px); }
+        .dropdown-item { color: white; transition: background 0.2s, padding-left 0.2s; }
+        .dropdown-item:hover { background-color: rgba(32, 201, 151, 0.2); color: var(--primary-green); padding-left: 20px; }
+        .offcanvas-end { background-color: var(--dark-green); color: white; border-left: 4px solid var(--primary-green); }
+        .navbar-toggler { border: none; box-shadow: none !important; }
+        .navbar-toggler-icon { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e"); }
+        .page-hero { padding: 60px 0 50px 0; color: white; position: relative; overflow: hidden; }
+        .page-hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--dark-green) 0%, #0d4a2a 100%); z-index: 0; }
+        .page-hero .container { position: relative; z-index: 1; }
+        .section-title { font-weight: 800; position: relative; margin-bottom: 60px; text-align: center; color: var(--dark-green); text-transform: uppercase; letter-spacing: 2px; }
+        .section-title::after { content: ''; width: 80px; height: 4px; background: var(--primary-green); position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); border-radius: 2px; }
+        section { padding: 80px 0; }
+        .card-custom { border: none; transition: transform 0.3s, box-shadow 0.3s; border-radius: 15px; overflow: hidden; }
+        .card-custom:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        .step-box { border-left: 4px solid var(--primary-green); padding: 20px 25px; margin-bottom: 25px; background: white; border-radius: 0 12px 12px 0; box-shadow: 0 3px 15px rgba(0,0,0,0.06); }
+        .breadcrumb-item a { color: var(--primary-green); text-decoration: none; }
+        .breadcrumb-item.active { color: rgba(255,255,255,0.7); }
+        .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.4); }
+        .tech-card { border-radius: 16px; border: none; box-shadow: 0 5px 25px rgba(0,0,0,0.08); transition: transform 0.3s, box-shadow 0.3s; }
+        .tech-card:hover { transform: translateY(-6px); box-shadow: 0 15px 35px rgba(0,0,0,0.12); }
+        .flow-step { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.07); position: relative; text-align: center; }
+        .flow-step .step-number { width: 50px; height: 50px; border-radius: 50%; background: var(--primary-green); color: white; font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+        .flow-arrow { display: flex; align-items: center; justify-content: center; color: var(--primary-green); font-size: 1.8rem; }
+
+        /* Bordi top card hardware */
+        .hw-card-green { border-top: 4px solid var(--primary-green) !important; }
+        .hw-card-success { border-top: 4px solid #198754 !important; }
+        .hw-card-warning { border-top: 4px solid #ffc107 !important; }
+
+        /* Card software orizzontale */
+        .soft-card { background: white; border-radius: 16px; box-shadow: 0 5px 25px rgba(0,0,0,0.07); padding: 28px; display: flex; align-items: flex-start; gap: 20px; transition: transform 0.3s, box-shadow 0.3s; }
+        .soft-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.12); }
+        .soft-icon { width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+        /* Architettura diagram */
+        .arch-box { border: 2px solid var(--primary-green); border-radius: 10px; padding: 10px 16px; text-align: center; font-weight: 700; font-size: 0.9rem; white-space: nowrap; }
+        .arch-arrow { color: var(--primary-green); font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
+        .arch-label { font-size: 0.7rem; color: rgba(255,255,255,0.6); text-align: center; margin-top: 4px; }
+
+        /* Accordion personalizzato */
+        .accordion-button:not(.collapsed) { background-color: #f0fff4; color: var(--dark-green); box-shadow: none; }
+        .accordion-button:focus { box-shadow: 0 0 0 0.2rem rgba(32,201,151,0.25); }
+        .accordion-button::after { filter: none; }
+        .accordion-item { border: 1px solid rgba(32,201,151,0.2); margin-bottom: 8px; border-radius: 10px !important; overflow: hidden; }
+
+        .cta-section { background: var(--dark-green); }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark" id="mainNav">
+    <div class="container-fluid px-4 px-lg-5">
+        <a class="navbar-brand" href="index.html">
+            <img src="icon.svg" alt="Logo IbleoCare" height="60" style="filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5));">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+            <div class="offcanvas-header border-bottom border-success border-opacity-25 p-4">
+                <h5 class="offcanvas-title fw-bold text-success" id="offcanvasNavbarLabel"><i class="bi bi-tree-fill me-2"></i>IbleoCare</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <ul class="navbar-nav justify-content-end align-items-lg-center flex-grow-1 pe-3 gap-2">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Il Progetto</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="progetto-descrizione.html">Descrizione Generale</a></li>
+                            <li><a class="dropdown-item" href="progetto-mission.html">Mission &amp; Obiettivi</a></li>
+                            <li><a class="dropdown-item" href="progetto-prototipo.html">Prototipo Arduino R4</a></li>
+                            <li><a class="dropdown-item" href="progetto-prodotto-finito.html">Prodotto Finito PCB</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">La Soluzione</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="soluzione-problema.html">Il Problema</a></li>
+                            <li><a class="dropdown-item" href="soluzione-funzionamento.html">Come Funziona</a></li>
+                            <li><a class="dropdown-item" href="soluzione-tecnologie.html">Tecnologie &amp; Componenti</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Business</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="business-valore.html">Value Proposition</a></li>
+                            <li><a class="dropdown-item" href="business-mercato.html">Mercato</a></li>
+                            <li><a class="dropdown-item" href="business-prezzi.html">Costi e Prezzi</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#chisiamo">Chi Siamo</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#contatti">Contatti</a></li>
+                    <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
+                        <a href="/login.html" class="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm w-100">
+                            <i class="bi bi-lock-fill me-1"></i> Area Privata
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item"><a href="#">La Soluzione</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Tecnologie &amp; Componenti</li>
+            </ol>
+        </nav>
+        <span class="badge bg-success fs-6 mb-3 px-3 py-2">La Soluzione</span>
+        <h1 class="display-4 fw-black mb-3">Lo Stack Tecnologico</h1>
+        <p class="lead opacity-85 mb-0" style="max-width: 650px;">Ogni componente scelto per efficienza, affidabilità e scalabilità</p>
+    </div>
+</div>
+
+<!-- SECTION 1: HARDWARE — I SENSORI -->
+<section style="background-color: #f8fbf9;">
+    <div class="container">
+        <h2 class="section-title">L'Hardware di Campo</h2>
+
+        <div class="row g-4">
+            <!-- Card 1: Sensore Umidità Capacitivo -->
+            <div class="col-lg-4">
+                <div class="card tech-card h-100 hw-card-green">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="badge bg-success me-2">SENSORE #1</span>
+                        </div>
+                        <div class="text-center mb-3">
+                            <i class="bi bi-moisture" style="font-size: 4rem; color: var(--primary-green);"></i>
+                        </div>
+                        <h5 class="fw-bold mb-1" style="color: var(--dark-green);">Sensore Umidità Capacitivo</h5>
+                        <p class="text-muted small mb-3">Corrosion-free, plug&amp;play</p>
+
+                        <ul class="list-unstyled mb-4">
+                            <li class="mb-2 d-flex align-items-start">
+                                <i class="bi bi-dot text-success me-1 flex-shrink-0" style="font-size: 1.2rem;"></i>
+                                <span class="small">Principio capacitivo (no ossidazione)</span>
+                            </li>
+                            <li class="mb-2 d-flex align-items-start">
+                                <i class="bi bi-dot text-success me-1 flex-shrink-0" style="font-size: 1.2rem;"></i>
+                                <span class="small">Range 0–100% umidità volumetrica</span>
+                            </li>
+                            <li class="mb-2 d-flex align-items-start">
+                                <i class="bi bi-dot text-success me-1 flex-shrink-0" style="font-size: 1.2rem;"></i>
+                                <span class="small">Tensione di alimentazione 3.3V–5V</span>
+                            </li>
+                            <li class="mb-2 d-flex align-items-start">
+                                <i class="bi bi-dot text-success me-1 flex-shrink-0" style="font-size: 1.2rem;"></i>
+                                <span class="small">Output segnale analogico 0–3V</span>
+                            </li>
+                            <li class="mb-2 d-flex align-items-start">
+                                <i class="bi bi-dot text-success me-1 flex-shrink-0" style="font-size: 1.2rem;"></i>
+                                <span class="small">Durata stimata: <strong>5+ anni in campo</strong></span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-footer border-0 bg-success bg-opacity-10 p-3">
+                        <small class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Scelto per il prototipo e il prodotto finale</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: DHT22 -->
+            <div class="col-lg-4">
+                <div class="card tech-card h-100 hw-card-success">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="badge bg-success me-2">SENSORE #2</span>
+                        </div>
+                        <div class="text-center mb-3">
+                            <i class="bi bi-thermometer-half" style="font-size: 4rem; color: #198754;"></i>
+                        </div>
+                        <h5 class="fw-bold mb-1" style="color: var(--dark-green);">DHT22 — Temp. &amp; Umidità Aria</h5>
+                        <p class="text-muted small mb-3">Monitoraggio ambientale preciso</p>
+
+                        <ul class="list-unstyled mb-4">
+                            <li class="mb-2 d-flex align-items-start">
+                                <i class="bi bi-dot text-success me-1 flex-shrink-0" style="font-size: 1.2rem;"></i>
+                                <span class="small">Range temperatura -40°C ~ +80°C (<strong>±0.5°C</strong>)</span>
+                            </li>
+                            <li class="mb-2 d-flex align-items-start">
+                                <i class="bi bi-dot text-success me-1 flex-shrink-0" style="font-size: 1.2rem;"></i>
+                                <span class="small">Range umidità 0–100% HR (<strong>±2%</strong>)</span>
+                            </li>
+                            <li class="mb-2 d-flex align-items-start">
+                                <i class="bi bi-dot text-success me-1 flex-shrink-0" style="font-size: 1.2rem;"></i>
+                                <span class="small">Interfaccia single-wire digital</span>
+                            </li>
+                            <li class="mb-2 d-flex align-items-start">
+                                <i class="bi bi-dot text-success me-1 flex-shrink-0" style="font-size: 1.2rem;"></i>
+                                <span class="small">Tempo di risposta: 2 secondi</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-footer border-0 p-3" style="background: rgba(25,135,84,0.08);">
+                        <small class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Monitoraggio ambientale serra e campo aperto</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Microcontrollore con tabs -->
+            <div class="col-lg-4">
+                <div class="card tech-card h-100 hw-card-warning">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="badge bg-warning text-dark me-2">MICROCONTROLLORE</span>
+                        </div>
+                        <div class="text-center mb-3">
+                            <i class="bi bi-cpu" style="font-size: 4rem; color: #ffc107;"></i>
+                        </div>
+                        <h5 class="fw-bold mb-1" style="color: var(--dark-green); font-size: 1rem;">XIAO ESP32-S3 / Arduino UNO R4 WiFi</h5>
+                        <p class="text-muted small mb-3">Prodotto finale vs. prototipo</p>
+
+                        <!-- Nav Tabs -->
+                        <ul class="nav nav-tabs mb-3" id="mcuTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active small fw-bold" id="arduino-tab" data-bs-toggle="tab" data-bs-target="#arduino-panel" type="button" role="tab">Arduino R4</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link small fw-bold" id="xiao-tab" data-bs-toggle="tab" data-bs-target="#xiao-panel" type="button" role="tab">XIAO ESP32-S3</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="mcuTabsContent">
+                            <div class="tab-pane fade show active" id="arduino-panel" role="tabpanel">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-1 d-flex align-items-start">
+                                        <i class="bi bi-dot me-1 text-warning flex-shrink-0" style="font-size: 1.2rem;"></i>
+                                        <span class="small">ARM Cortex-M4 48MHz</span>
+                                    </li>
+                                    <li class="mb-1 d-flex align-items-start">
+                                        <i class="bi bi-dot me-1 text-warning flex-shrink-0" style="font-size: 1.2rem;"></i>
+                                        <span class="small">WiFi via ESP32-S3 integrato</span>
+                                    </li>
+                                    <li class="mb-1 d-flex align-items-start">
+                                        <i class="bi bi-dot me-1 text-warning flex-shrink-0" style="font-size: 1.2rem;"></i>
+                                        <span class="small">Ideale per sviluppo e test</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="tab-pane fade" id="xiao-panel" role="tabpanel">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-1 d-flex align-items-start">
+                                        <i class="bi bi-dot me-1 text-success flex-shrink-0" style="font-size: 1.2rem;"></i>
+                                        <span class="small">Dual-Core 240MHz</span>
+                                    </li>
+                                    <li class="mb-1 d-flex align-items-start">
+                                        <i class="bi bi-dot me-1 text-success flex-shrink-0" style="font-size: 1.2rem;"></i>
+                                        <span class="small">WiFi + BLE5</span>
+                                    </li>
+                                    <li class="mb-1 d-flex align-items-start">
+                                        <i class="bi bi-dot me-1 text-success flex-shrink-0" style="font-size: 1.2rem;"></i>
+                                        <span class="small">Ultra-compact 21x17mm</span>
+                                    </li>
+                                    <li class="mb-1 d-flex align-items-start">
+                                        <i class="bi bi-dot me-1 text-success flex-shrink-0" style="font-size: 1.2rem;"></i>
+                                        <span class="small">Ideale per produzione</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer border-0 p-3" style="background: rgba(255,193,7,0.08);">
+                        <small class="text-warning fw-bold"><i class="bi bi-arrow-left-right me-1"></i>Percorso prototipo &#8594; prodotto</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 2: BACKEND — LO STACK SOFTWARE -->
+<section style="background-color: white;">
+    <div class="container">
+        <h2 class="section-title">Lo Stack Software</h2>
+
+        <div class="row g-4">
+            <!-- MQTT Broker -->
+            <div class="col-12">
+                <div class="soft-card">
+                    <div class="soft-icon" style="background: rgba(32,201,151,0.12);">
+                        <i class="bi bi-router" style="font-size: 2rem; color: #0d9488;"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                            <h5 class="fw-bold mb-0" style="color: var(--dark-green);">MQTT Broker (Mosquitto)</h5>
+                            <span class="badge bg-secondary">Open Source</span>
+                            <span class="badge bg-secondary">Scalabile</span>
+                            <span class="badge bg-secondary">Standard IoT</span>
+                        </div>
+                        <p class="text-muted mb-0">Il broker MQTT Mosquitto è il cuore del sistema di messaggistica. Gestisce <strong>centinaia di dispositivi connessi simultaneamente</strong> con overhead minimo. Il protocollo QoS 1 garantisce la consegna affidabile dei messaggi anche in caso di connessione instabile tipica dei campi agricoli remoti.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Node.js -->
+            <div class="col-12">
+                <div class="soft-card">
+                    <div class="soft-icon" style="background: rgba(34,197,94,0.12);">
+                        <i class="bi bi-filetype-js" style="font-size: 2rem; color: #16a34a;"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                            <h5 class="fw-bold mb-0" style="color: var(--dark-green);">Backend Node.js + Express</h5>
+                            <span class="badge bg-success">REST API</span>
+                            <span class="badge bg-success">WebSocket</span>
+                            <span class="badge bg-success">Event-Driven</span>
+                        </div>
+                        <p class="text-muted mb-0">Il server applicativo è costruito su Node.js con Express.js. L'<strong>architettura event-driven</strong> di Node.js è perfetta per l'IoT: gestisce migliaia di connessioni WebSocket simultanée senza bloccare il thread. Le API REST permettono l'integrazione con app mobile di terze parti.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PostgreSQL -->
+            <div class="col-12">
+                <div class="soft-card">
+                    <div class="soft-icon" style="background: rgba(59,130,246,0.12);">
+                        <i class="bi bi-database" style="font-size: 2rem; color: #2563eb;"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                            <h5 class="fw-bold mb-0" style="color: var(--dark-green);">Database PostgreSQL</h5>
+                            <span class="badge bg-primary">ACID</span>
+                            <span class="badge bg-primary">Scalabile</span>
+                            <span class="badge bg-primary">Open Source</span>
+                        </div>
+                        <p class="text-muted mb-0">PostgreSQL archivia tutte le letture dei sensori con timestamp preciso al millisecondo. Le <strong>query ottimizzate con indici</strong> su timestamp e device_id permettono di restituire 30 giorni di dati storici in meno di 50ms. Supporto nativo per dati JSON per flessibilità futura.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart.js -->
+            <div class="col-12">
+                <div class="soft-card">
+                    <div class="soft-icon" style="background: rgba(239,68,68,0.12);">
+                        <i class="bi bi-graph-up" style="font-size: 2rem; color: #dc2626;"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                            <h5 class="fw-bold mb-0" style="color: var(--dark-green);">Dashboard con Chart.js</h5>
+                            <span class="badge bg-danger">Real-time</span>
+                            <span class="badge bg-danger">Responsive</span>
+                            <span class="badge bg-danger">Grafici interattivi</span>
+                        </div>
+                        <p class="text-muted mb-0">La dashboard web utilizza Chart.js per visualizzazioni real-time e storiche. Grafici a linea per l'andamento di umidità e temperatura, grafici a barre per il confronto settimanale, gauge per i valori in tempo reale. Tutto aggiornato via <strong>WebSocket senza refresh</strong> della pagina.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 3: PERCHÉ QUESTE SCELTE? -->
+<section style="background-color: #f8fbf9;">
+    <div class="container">
+        <h2 class="section-title">Le Nostre Decisioni Tecniche</h2>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <div class="accordion" id="faqAccordion">
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faq1-header">
+                            <button class="accordion-button fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#faq1" aria-expanded="true" aria-controls="faq1">
+                                <i class="bi bi-question-circle-fill text-success me-3"></i> Perché MQTT e non HTTP?
+                            </button>
+                        </h2>
+                        <div id="faq1" class="accordion-collapse collapse show" aria-labelledby="faq1-header" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted">
+                                MQTT è progettato specificamente per l'IoT: consumo dati <strong>100x minore di HTTP</strong>, latenza inferiore al secondo, supporto nativo per connessioni instabili tipiche dei campi agricoli. Un messaggio MQTT con i dati del sensore occupa meno di 1 KB contro i 5-20 KB di una richiesta HTTP con header.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faq2-header">
+                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#faq2" aria-expanded="false" aria-controls="faq2">
+                                <i class="bi bi-question-circle-fill text-success me-3"></i> Perché sensori capacitivi e non resistivi?
+                            </button>
+                        </h2>
+                        <div id="faq2" class="accordion-collapse collapse" aria-labelledby="faq2-header" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted">
+                                I sensori resistivi si <strong>ossidano in 3-6 mesi</strong> nel terreno umido, rendendo le letture progressivamente inaffidabili fino all'inutilizzabilità. I sensori capacitivi non hanno parti metalliche esposte all'elettrolisi: durano anni senza alcuna manutenzione, riducendo drasticamente i costi operativi.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faq3-header">
+                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#faq3" aria-expanded="false" aria-controls="faq3">
+                                <i class="bi bi-question-circle-fill text-success me-3"></i> Perché Node.js e non Python?
+                            </button>
+                        </h2>
+                        <div id="faq3" class="accordion-collapse collapse" aria-labelledby="faq3-header" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted">
+                                L'<strong>architettura asincrona e non-bloccante</strong> di Node.js gestisce migliaia di connessioni WebSocket simultanée, ideale per una dashboard real-time multi-utente. Python con un server WSGI tradizionale aprirebbe un thread per ogni connessione, diventando un collo di bottiglia al crescere degli utenti.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faq4-header">
+                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#faq4" aria-expanded="false" aria-controls="faq4">
+                                <i class="bi bi-question-circle-fill text-success me-3"></i> Perché PostgreSQL e non MongoDB?
+                            </button>
+                        </h2>
+                        <div id="faq4" class="accordion-collapse collapse" aria-labelledby="faq4-header" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted">
+                                I dati dei sensori hanno una struttura <strong>altamente regolare</strong> (timestamp, device_id, valore): un database relazionale con indici ottimizzati su queste colonne è più efficiente di un NoSQL per query temporali. PostgreSQL restituisce 30 giorni di letture in &lt;50ms grazie agli indici B-tree su timestamp.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faq5-header">
+                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#faq5" aria-expanded="false" aria-controls="faq5">
+                                <i class="bi bi-question-circle-fill text-success me-3"></i> Perché ESP32-S3 e non Raspberry Pi?
+                            </button>
+                        </h2>
+                        <div id="faq5" class="accordion-collapse collapse" aria-labelledby="faq5-header" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted">
+                                Il Raspberry Pi ha costi, consumi e dimensioni <strong>10x maggiori</strong>. L'ESP32-S3 esegue tutto il firmware necessario con 240MHz, WiFi e BLE integrati in un chip da 21x17mm al costo di circa 5€. Per l'edge IoT embedded, è la scelta industriale corretta.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 4: ARCHITETTURA DI SISTEMA -->
+<section class="cta-section">
+    <div class="container text-white py-3">
+        <h2 class="section-title text-white mb-5" style="color: white !important;">Visione d'insieme dell'Architettura</h2>
+
+        <!-- Diagramma architettura -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-12 col-xl-10">
+
+                <!-- Livello 1: campo -->
+                <div class="row g-2 align-items-center justify-content-center mb-2">
+                    <div class="col-auto">
+                        <div class="arch-box">
+                            <i class="bi bi-moisture me-1"></i> Sensori Campo
+                        </div>
+                        <div class="arch-label">umidità, temperatura</div>
+                    </div>
+                    <div class="col-auto arch-arrow">&#8594;</div>
+                    <div class="col-auto">
+                        <div class="arch-box">
+                            <i class="bi bi-cpu me-1"></i> XIAO ESP32-S3
+                        </div>
+                        <div class="arch-label">firmware embedded</div>
+                    </div>
+                    <div class="col-auto arch-arrow">
+                        <div>&#8594; WiFi &#8594;</div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="arch-box">
+                            <i class="bi bi-router me-1"></i> MQTT Broker
+                        </div>
+                        <div class="arch-label">Mosquitto</div>
+                    </div>
+                    <div class="col-auto arch-arrow">&#8594;</div>
+                    <div class="col-auto">
+                        <div class="arch-box">
+                            <i class="bi bi-server me-1"></i> Node.js Server
+                        </div>
+                        <div class="arch-label">Express + MQTT client</div>
+                    </div>
+                    <div class="col-auto arch-arrow">&#8594;</div>
+                    <div class="col-auto">
+                        <div class="arch-box">
+                            <i class="bi bi-database me-1"></i> PostgreSQL
+                        </div>
+                        <div class="arch-label">persistenza dati</div>
+                    </div>
+                </div>
+
+                <!-- Connettori verticali e livello 2 -->
+                <div class="row g-2 justify-content-center mb-2">
+                    <!-- Spacer a sinistra (fino al Node.js) -->
+                    <div class="col-12 text-center">
+                        <div class="d-flex justify-content-center gap-2 flex-wrap">
+                            <div style="width: 80px;"></div>
+                            <div style="width: 80px;"></div>
+                            <div style="width: 80px;"></div>
+                            <div class="arch-arrow" style="flex-direction: column; gap: 0;">
+                                <span style="margin-left: 20px;">&#8595; WebSocket</span>
+                            </div>
+                            <div style="width: 80px;"></div>
+                            <div class="arch-arrow" style="flex-direction: column; gap: 0;">
+                                <span>&#8595; REST API</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Livello 3: dashboard -->
+                <div class="row justify-content-center">
+                    <div class="col-auto">
+                        <div class="arch-box" style="border-color: #fbbf24; color: #fbbf24; background: rgba(251,191,36,0.08);">
+                            <i class="bi bi-display me-1"></i> Dashboard Web Browser
+                        </div>
+                        <div class="arch-label" style="color: rgba(255,255,255,0.5);">Chart.js + WebSocket real-time</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Nota scalabilità -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8">
+                <div class="p-4 rounded-3 text-center" style="background: rgba(255,255,255,0.07); border: 1px solid rgba(32,201,151,0.3);">
+                    <i class="bi bi-arrows-expand text-success mb-2 d-block" style="font-size: 2rem;"></i>
+                    <h6 class="fw-bold text-success mb-2">Scalabilità Orizzontale</h6>
+                    <p class="opacity-85 mb-0">L'architettura è progettata per scalare orizzontalmente. L'aggiunta di nuovi dispositivi sensori richiede <strong>zero configurazione lato server</strong> grazie al pattern publish/subscribe MQTT.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="text-center">
+            <a href="business-valore.html" class="btn btn-success btn-lg rounded-pill px-5 fw-bold shadow-sm">
+                Scopri il Modello di Business <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-dark text-white py-5 border-top border-success border-5">
+    <div class="container text-center text-md-start">
+        <div class="row g-4 align-items-center">
+            <div class="col-md-4 text-center text-md-start">
+                <h3 class="fw-bold text-success mb-2">&#127807; IbleoCare</h3>
+                <p class="small opacity-50 mb-0">L'IoT che rispetta la natura.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <a href="/login.html" class="btn btn-outline-success rounded-pill px-4">Accesso Portale Privato</a>
+            </div>
+            <div class="col-md-4 text-center text-md-end">
+                <p class="mb-0 small opacity-50">&copy; 2026 IbleoCare Project.<br>Team JA Italia.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="it" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controllo Dispositivi — IbleoCare</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --primary-green:  #20c997;
+            --dark-green:     #0a2e1c;
+            --earth-brown:    #8B4513;
+            --sidebar-width:  260px;
+            --topbar-height:  64px;
+            --bg-page:        #f0f7f4;
+            --bg-card:        #ffffff;
+            --bg-sidebar:     var(--dark-green);
+            --text-primary:   #1a3a2a;
+            --text-muted:     #6b7e74;
+            --border-subtle:  rgba(32, 201, 151, 0.15);
+            --shadow-card:    0 4px 20px rgba(10, 46, 28, 0.08);
+            --topbar-bg:      #ffffff;
+            --topbar-border:  rgba(32, 201, 151, 0.2);
+        }
+        [data-bs-theme="dark"] {
+            --bg-page:        #0d1f16;
+            --bg-card:        #12291c;
+            --bg-sidebar:     #081510;
+            --text-primary:   #e0f0e8;
+            --text-muted:     #7aab8f;
+            --border-subtle:  rgba(32, 201, 151, 0.12);
+            --shadow-card:    0 4px 24px rgba(0,0,0,0.35);
+            --topbar-bg:      #0f2218;
+            --topbar-border:  rgba(32, 201, 151, 0.15);
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-page); color: var(--text-primary); min-height: 100vh; transition: background 0.3s, color 0.3s; }
+        body::before { content:''; position:fixed; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--dark-green),var(--primary-green),var(--earth-brown)); background-size:200% 100%; animation:shimmerBar 4s linear infinite; z-index:9999; }
+        @keyframes shimmerBar { 0%{background-position:0% 0%} 100%{background-position:200% 0%} }
+
+        /* SIDEBAR */
+        #sidebar { position:fixed; top:0; left:0; bottom:0; width:var(--sidebar-width); background:var(--bg-sidebar); z-index:1040; display:flex; flex-direction:column; overflow:hidden; transition:width 0.3s ease,transform 0.3s ease; border-right:1px solid rgba(32,201,151,0.1); }
+        #sidebar::after { content:''; position:absolute; bottom:-60px; right:-60px; width:200px; height:200px; background:radial-gradient(circle,rgba(32,201,151,0.06) 0%,transparent 70%); border-radius:50%; pointer-events:none; }
+        .sidebar-brand { display:flex; align-items:center; gap:12px; padding:20px 22px; border-bottom:1px solid rgba(32,201,151,0.15); text-decoration:none; flex-shrink:0; margin-top:3px; }
+        .sidebar-brand-icon { width:38px; height:38px; background:linear-gradient(135deg,var(--primary-green),#0d7a58); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; color:white; flex-shrink:0; box-shadow:0 4px 12px rgba(32,201,151,0.35); }
+        .sidebar-brand-text { color:white; font-size:1.15rem; font-weight:700; letter-spacing:0.5px; white-space:nowrap; overflow:hidden; }
+        .sidebar-brand-text span { display:block; font-size:0.65rem; font-weight:400; color:rgba(255,255,255,0.4); letter-spacing:2px; text-transform:uppercase; margin-top:1px; }
+        .sidebar-nav { flex:1; overflow-y:auto; padding:16px 0; scrollbar-width:thin; scrollbar-color:rgba(32,201,151,0.2) transparent; }
+        .sidebar-nav-label { font-size:0.6rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:rgba(255,255,255,0.25); padding:12px 22px 6px; }
+        .sidebar-link { display:flex; align-items:center; gap:13px; padding:11px 22px; color:rgba(255,255,255,0.65); text-decoration:none; font-size:0.88rem; font-weight:500; border-left:3px solid transparent; transition:all 0.2s; white-space:nowrap; overflow:hidden; }
+        .sidebar-link i { font-size:1.1rem; flex-shrink:0; width:22px; text-align:center; }
+        .sidebar-link:hover { color:white; background:rgba(32,201,151,0.08); border-left-color:rgba(32,201,151,0.4); }
+        .sidebar-link.active { color:var(--primary-green); background:rgba(32,201,151,0.12); border-left-color:var(--primary-green); font-weight:600; }
+        .sidebar-link .badge-count { margin-left:auto; background:rgba(220,53,69,0.85); color:white; font-size:0.65rem; padding:2px 7px; border-radius:20px; font-weight:600; }
+        .sidebar-footer { border-top:1px solid rgba(32,201,151,0.12); padding:16px 0 12px; flex-shrink:0; }
+        .sidebar-link.logout { color:rgba(255,255,255,0.5); }
+        .sidebar-link.logout:hover { color:#ff6b6b; background:rgba(220,53,69,0.08); border-left-color:rgba(220,53,69,0.5); }
+        @media (max-width:991.98px) { #sidebar{transform:translateX(-100%);} #sidebar.sidebar-open{transform:translateX(0);} #content-wrapper{margin-left:0 !important;} }
+        #sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1039; backdrop-filter:blur(2px); }
+        #sidebar-overlay.visible { display:block; }
+
+        /* LAYOUT */
+        #content-wrapper { margin-left:var(--sidebar-width); min-height:100vh; display:flex; flex-direction:column; transition:margin-left 0.3s ease; }
+        #topbar { position:sticky; top:0; height:var(--topbar-height); background:var(--topbar-bg); border-bottom:1px solid var(--topbar-border); z-index:1030; display:flex; align-items:center; padding:0 28px; gap:16px; box-shadow:0 1px 8px rgba(10,46,28,0.06); transition:background 0.3s,border-color 0.3s; }
+        .topbar-hamburger { display:none; background:none; border:none; color:var(--text-primary); font-size:1.3rem; cursor:pointer; padding:6px; border-radius:8px; transition:background 0.2s; }
+        .topbar-hamburger:hover { background:var(--border-subtle); }
+        @media (max-width:991.98px) { .topbar-hamburger { display:block; } }
+        .topbar-title { font-size:0.95rem; font-weight:600; color:var(--text-primary); }
+        .topbar-title span { font-weight:400; color:var(--text-muted); font-size:0.8rem; }
+        .topbar-spacer { flex:1; }
+        .theme-toggle { display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none; }
+        .theme-toggle-track { width:42px; height:22px; background:var(--text-muted); border-radius:11px; position:relative; transition:background 0.3s; flex-shrink:0; }
+        .theme-toggle-track.dark { background:var(--primary-green); }
+        .theme-toggle-thumb { position:absolute; top:3px; left:3px; width:16px; height:16px; background:white; border-radius:50%; transition:transform 0.3s; box-shadow:0 1px 4px rgba(0,0,0,0.25); }
+        .theme-toggle-track.dark .theme-toggle-thumb { transform:translateX(20px); }
+        .theme-icon { font-size:1rem; color:var(--text-muted); }
+        .topbar-user { display:flex; align-items:center; gap:10px; }
+        .user-avatar { width:36px; height:36px; background:linear-gradient(135deg,var(--primary-green),var(--dark-green)); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:0.85rem; flex-shrink:0; }
+        .user-name { font-size:0.85rem; font-weight:600; color:var(--text-primary); white-space:nowrap; }
+        .user-role { font-size:0.7rem; color:var(--text-muted); }
+        .mqtt-status { display:flex; align-items:center; gap:6px; font-size:0.75rem; font-weight:600; padding:5px 12px; border-radius:20px; background:rgba(32,201,151,0.1); color:var(--primary-green); border:1px solid rgba(32,201,151,0.25); }
+        .mqtt-dot { width:7px; height:7px; border-radius:50%; background:var(--primary-green); animation:pulse-dot 2s ease-in-out infinite; }
+        @keyframes pulse-dot { 0%,100%{box-shadow:0 0 0 0 rgba(32,201,151,0.5);} 50%{box-shadow:0 0 0 5px rgba(32,201,151,0);} }
+        #main-content { flex:1; padding:28px; }
+        .page-header { margin-bottom:28px; }
+        .page-header h1 { font-size:1.5rem; font-weight:700; color:var(--text-primary); margin-bottom:3px; }
+        .page-header p { font-size:0.85rem; color:var(--text-muted); margin:0; }
+
+        /* PAGE-SPECIFIC */
+        .section-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-subtle);
+            margin-bottom: 24px;
+        }
+        .section-card-title {
+            font-size: 1rem; font-weight: 700;
+            color: var(--text-primary); margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        /* Valvola / switch row */
+        .valve-row {
+            display: flex; align-items: center; gap: 16px;
+            padding: 16px 18px;
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-page);
+            margin-bottom: 12px;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .valve-row.active-valve {
+            border-color: rgba(32,201,151,0.4);
+            background: rgba(32,201,151,0.04);
+        }
+        .valve-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; flex-shrink: 0;
+            background: rgba(32,201,151,0.1); color: var(--primary-green);
+            transition: background 0.2s;
+        }
+        .valve-row.active-valve .valve-icon { background: rgba(32,201,151,0.2); }
+        .valve-info { flex: 1; min-width: 0; }
+        .valve-info strong { display: block; font-size: 0.88rem; font-weight: 700; color: var(--text-primary); }
+        .valve-info small { font-size: 0.75rem; color: var(--text-muted); }
+        .valve-status-text {
+            font-size: 0.75rem; font-weight: 600; min-width: 60px; text-align: right;
+            transition: color 0.2s;
+        }
+        .valve-status-text.on  { color: var(--primary-green); }
+        .valve-status-text.off { color: var(--text-muted); }
+
+        /* Custom toggle Bootstrap override */
+        .form-check-input:checked { background-color: var(--primary-green); border-color: var(--primary-green); }
+        .form-check-input:focus   { box-shadow: 0 0 0 3px rgba(32,201,151,0.2); border-color: var(--primary-green); }
+        .form-switch .form-check-input { width: 2.4em; height: 1.3em; cursor: pointer; }
+
+        /* Automazione timer */
+        .schedule-badge {
+            font-size: 0.7rem; padding: 3px 9px; border-radius: 20px; font-weight: 600;
+            background: rgba(13,110,253,0.1); color: #0d6efd;
+            cursor: pointer;
+        }
+
+        /* Console MQTT */
+        .console-input-group label {
+            font-size: 0.78rem; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 6px; display: block;
+        }
+        .console-input-group .form-control,
+        .console-input-group .form-select {
+            background: var(--bg-page); border-color: var(--border-subtle);
+            color: var(--text-primary); font-size: 0.85rem;
+        }
+        .console-input-group .form-control:focus,
+        .console-input-group .form-select:focus {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(32,201,151,0.15);
+        }
+        textarea.form-control { font-family: 'Courier New', monospace; font-size: 0.82rem; resize: vertical; }
+
+        /* Log console output */
+        .console-log {
+            background: var(--bg-page);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            max-height: 180px;
+            overflow-y: auto;
+            margin-top: 16px;
+        }
+        .log-line { padding: 2px 0; border-bottom: 1px solid var(--border-subtle); }
+        .log-line:last-child { border-bottom: none; }
+        .log-line .ts { color: var(--text-muted); margin-right: 8px; }
+        .log-line.success .msg { color: var(--primary-green); }
+        .log-line.error   .msg { color: #dc3545; }
+        .log-line.info    .msg { color: #3b82f6; }
+        .log-line.warn    .msg { color: #fd7e14; }
+
+        /* Presets rapidi */
+        .preset-btn {
+            background: var(--bg-page); border: 1px solid var(--border-subtle);
+            color: var(--text-primary); border-radius: 8px; padding: 8px 14px;
+            font-size: 0.8rem; cursor: pointer; transition: all 0.2s;
+        }
+        .preset-btn:hover { border-color: var(--primary-green); color: var(--primary-green); background: rgba(32,201,151,0.06); }
+
+        /* Warning banner */
+        .warning-banner {
+            background: rgba(253,126,20,0.08);
+            border: 1px solid rgba(253,126,20,0.25);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 0.82rem;
+            color: #fd7e14;
+            margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        @media (max-width:575.98px) { #main-content { padding:18px 16px; } }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+    <a class="sidebar-brand" href="/private/dashboard.html">
+        <div class="sidebar-brand-icon"><i class="bi bi-tree-fill"></i></div>
+        <div class="sidebar-brand-text">IbleoCare<span>Area Riservata</span></div>
+    </a>
+    <nav class="sidebar-nav">
+        <div class="sidebar-nav-label">Menu Principale</div>
+        <a class="sidebar-link" href="/private/dashboard.html"><i class="bi bi-grid-1x2-fill"></i>Dashboard</a>
+        <a class="sidebar-link" href="/private/nodi.html"><i class="bi bi-cpu-fill"></i>Nodi IoT</a>
+        <a class="sidebar-link" href="/private/storico.html"><i class="bi bi-clock-history"></i>Storico Dati</a>
+        <a class="sidebar-link active" href="/private/controllo.html"><i class="bi bi-sliders2-vertical"></i>Controllo</a>
+        <div class="sidebar-nav-label" style="margin-top:8px;">Sistema</div>
+        <a class="sidebar-link" href="/private/notifiche.html" id="nav-notifications">
+            <i class="bi bi-bell-fill"></i>Notifiche
+            <span class="badge-count" id="sidebar-notif-count">3</span>
+        </a>
+        <a class="sidebar-link" href="#"><i class="bi bi-gear-fill"></i>Impostazioni</a>
+    </nav>
+    <div class="sidebar-footer">
+        <a class="sidebar-link logout" href="#" id="logout-btn"><i class="bi bi-box-arrow-left"></i>Logout</a>
+    </div>
+</aside>
+<div id="sidebar-overlay"></div>
+
+<div id="content-wrapper">
+    <header id="topbar">
+        <button class="topbar-hamburger" id="sidebar-toggle"><i class="bi bi-list"></i></button>
+        <div class="topbar-title">Controllo <span>/ Area Riservata</span></div>
+        <div class="mqtt-status ms-2 d-none d-sm-flex" id="mqtt-status-pill">
+            <span class="mqtt-dot" id="mqtt-dot"></span>
+            <span class="mqtt-label" id="mqtt-label">MQTT Connesso</span>
+        </div>
+        <div class="topbar-spacer"></div>
+        <label class="theme-toggle" id="theme-toggle">
+            <i class="bi bi-sun-fill theme-icon"></i>
+            <div class="theme-toggle-track" id="theme-track"><div class="theme-toggle-thumb"></div></div>
+            <i class="bi bi-moon-stars-fill theme-icon"></i>
+        </label>
+        <div class="topbar-user ms-3">
+            <div class="user-avatar" id="user-avatar">MR</div>
+            <div class="d-none d-md-block">
+                <div class="user-name" id="user-display-name">Mario Rossi</div>
+                <div class="user-role">Amministratore</div>
+            </div>
+        </div>
+    </header>
+
+    <main id="main-content">
+
+        <div class="page-header">
+            <h1><i class="bi bi-sliders2-vertical me-2" style="color:var(--primary-green)"></i>Controllo Dispositivi e MQTT</h1>
+            <p>Gestisci manualmente le elettrovalvole e invia comandi diretti ai microcontrollori.</p>
+        </div>
+
+        <!-- Warning banner -->
+        <div class="warning-banner">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <span>Il controllo manuale sovrascrive temporaneamente le automazioni programmate. Ricorda di riattivare la modalità automatica dopo l'intervento.</span>
+        </div>
+
+        <div class="row g-4">
+            <!-- Colonna sinistra: Valvole -->
+            <div class="col-lg-6">
+
+                <!-- Elettrovalvole -->
+                <div class="section-card">
+                    <div class="section-card-title">
+                        <i class="bi bi-toggles2" style="color:var(--primary-green)"></i>
+                        Controllo Elettrovalvole
+                        <span class="ms-auto badge bg-success bg-opacity-10 text-success" id="valves-on-count">0 attive</span>
+                    </div>
+
+                    <div id="valves-list">
+                        <!-- Popolato da renderValves() -->
+                    </div>
+
+                    <div class="d-flex gap-2 mt-3 flex-wrap">
+                        <button class="btn btn-sm btn-success rounded-pill px-3" onclick="setAllValves(true)">
+                            <i class="bi bi-play-fill me-1"></i>Attiva tutte
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="setAllValves(false)">
+                            <i class="bi bi-stop-fill me-1"></i>Spegni tutte
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Automazione Scheduler -->
+                <div class="section-card">
+                    <div class="section-card-title">
+                        <i class="bi bi-alarm" style="color:#3b82f6"></i>
+                        Programmazione Oraria
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label" style="font-size:0.78rem;font-weight:600;color:var(--text-muted)">Nodo / Valvola</label>
+                            <select class="form-select form-select-sm" style="background:var(--bg-page);border-color:var(--border-subtle);color:var(--text-primary)">
+                                <option>Pompa Serra 1</option>
+                                <option>Pompa Campo Nord</option>
+                                <option>Gocciolatori Balcone</option>
+                                <option>Irrigatori Campo Sud</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <label class="form-label" style="font-size:0.78rem;font-weight:600;color:var(--text-muted)">Ora Inizio</label>
+                            <input type="time" class="form-control form-control-sm" value="06:00" style="background:var(--bg-page);border-color:var(--border-subtle);color:var(--text-primary)">
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <label class="form-label" style="font-size:0.78rem;font-weight:600;color:var(--text-muted)">Durata (min)</label>
+                            <input type="number" class="form-control form-control-sm" value="20" min="1" max="120" style="background:var(--bg-page);border-color:var(--border-subtle);color:var(--text-primary)">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" style="font-size:0.78rem;font-weight:600;color:var(--text-muted)">Giorni</label>
+                            <div class="d-flex gap-2 flex-wrap" id="days-selector">
+                                <!-- Generato da JS -->
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <button class="btn btn-success btn-sm rounded-pill px-4 w-100" onclick="saveSchedule()">
+                                <i class="bi bi-clock me-2"></i>Salva Programmazione
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Colonna destra: Console MQTT -->
+            <div class="col-lg-6">
+                <div class="section-card">
+                    <div class="section-card-title">
+                        <i class="bi bi-terminal-fill" style="color:#fd7e14"></i>
+                        Console Comandi Avanzata
+                        <span class="ms-auto" style="font-size:0.7rem;color:var(--text-muted);font-weight:400">Broker: mqtt://localhost:1883</span>
+                    </div>
+
+                    <!-- Preset rapidi -->
+                    <div class="mb-4">
+                        <p style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px">Preset rapidi</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="preset-btn" onclick="loadPreset('ping')"><i class="bi bi-wifi me-1"></i>Ping Nodo</button>
+                            <button class="preset-btn" onclick="loadPreset('status')"><i class="bi bi-info-circle me-1"></i>Stato</button>
+                            <button class="preset-btn" onclick="loadPreset('restart')"><i class="bi bi-arrow-repeat me-1"></i>Riavvio</button>
+                            <button class="preset-btn" onclick="loadPreset('calibrate')"><i class="bi bi-tools me-1"></i>Calibra</button>
+                        </div>
+                    </div>
+
+                    <!-- Form -->
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-5 console-input-group">
+                            <label for="mqtt-nodo-sel">Nodo Destinatario</label>
+                            <select class="form-select" id="mqtt-nodo-sel">
+                                <option value="broadcast">Broadcast (tutti)</option>
+                                <option value="node/1">Nodo 1 — Campo Nord</option>
+                                <option value="node/2">Nodo 2 — Campo Sud</option>
+                                <option value="node/3">Nodo 3 — Serra A</option>
+                                <option value="node/4">Nodo 4 — Magazzino</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-sm-7 console-input-group">
+                            <label for="mqtt-topic">Topic MQTT</label>
+                            <input type="text" class="form-control" id="mqtt-topic" placeholder="ibleocare/node/1/cmd" value="ibleocare/broadcast/cmd">
+                        </div>
+                        <div class="col-12 console-input-group">
+                            <label for="mqtt-payload">Payload JSON</label>
+                            <textarea class="form-control" id="mqtt-payload" rows="5" placeholder='{"action": "ping"}'>{
+  "action": "ping",
+  "ts": ""
+}</textarea>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex gap-2 align-items-center">
+                                <button class="btn btn-warning rounded-pill px-4 fw-bold" id="btn-send-mqtt" onclick="sendMQTTCommand()">
+                                    <i class="bi bi-send-fill me-2"></i>Invia Comando MQTT
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm rounded-pill" onclick="clearLog()">
+                                    <i class="bi bi-trash me-1"></i>Pulisci log
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Console output log -->
+                    <div class="console-log" id="console-log">
+                        <div class="log-line info">
+                            <span class="ts" id="log-init-ts">--</span>
+                            <span class="msg">Sistema pronto. Console MQTT inizializzata.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modalità sistema -->
+                <div class="section-card">
+                    <div class="section-card-title">
+                        <i class="bi bi-gear-wide-connected" style="color:#6f42c1"></i>
+                        Modalità di Sistema
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="valve-row" id="auto-mode-row">
+                                <div class="valve-icon" style="background:rgba(111,66,193,0.1);color:#6f42c1"><i class="bi bi-robot"></i></div>
+                                <div class="valve-info">
+                                    <strong>Irrigazione Automatica</strong>
+                                    <small>Gestione autonoma basata su soglie umidità</small>
+                                </div>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" id="sw-auto-mode" checked onchange="toggleSystemMode(this,'auto')">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="valve-row">
+                                <div class="valve-icon" style="background:rgba(253,126,20,0.1);color:#fd7e14"><i class="bi bi-bell"></i></div>
+                                <div class="valve-info">
+                                    <strong>Allarmi Push</strong>
+                                    <small>Notifiche immediate per soglie critiche</small>
+                                </div>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" id="sw-alerts" checked onchange="toggleSystemMode(this,'alerts')">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="valve-row">
+                                <div class="valve-icon" style="background:rgba(13,110,253,0.1);color:#0d6efd"><i class="bi bi-cloud-upload"></i></div>
+                                <div class="valve-info">
+                                    <strong>Sync Cloud</strong>
+                                    <small>Backup dati sensori su server remoto</small>
+                                </div>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" id="sw-cloud" onchange="toggleSystemMode(this,'cloud')">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+'use strict';
+
+(function authGuard() {
+    const token = sessionStorage.getItem('ibleocare_token') || localStorage.getItem('ibleocare_token');
+    if (!token) { window.location.replace('/login.html'); throw new Error('AUTH_REQUIRED'); }
+})();
+
+const ThemeManager = (() => {
+    const KEY = 'ibleocare_theme'; const html = document.documentElement; const track = document.getElementById('theme-track');
+    function apply(t){ html.setAttribute('data-bs-theme',t); if(track)track.classList.toggle('dark',t==='dark'); localStorage.setItem(KEY,t); }
+    function init(){ apply(localStorage.getItem(KEY)||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')); }
+    return { init, toggle:()=>apply(html.getAttribute('data-bs-theme')==='light'?'dark':'light'), current:()=>html.getAttribute('data-bs-theme') };
+})();
+document.getElementById('theme-toggle').addEventListener('click',()=>ThemeManager.toggle());
+ThemeManager.init();
+
+const sidebar = document.getElementById('sidebar'), sidebarOverlay = document.getElementById('sidebar-overlay');
+document.getElementById('sidebar-toggle').addEventListener('click',()=>{sidebar.classList.toggle('sidebar-open');sidebarOverlay.classList.toggle('visible');});
+sidebarOverlay.addEventListener('click',()=>{sidebar.classList.remove('sidebar-open');sidebarOverlay.classList.remove('visible');});
+document.getElementById('logout-btn').addEventListener('click',(e)=>{e.preventDefault();if(confirm('Sei sicuro di voler uscire?')){sessionStorage.removeItem('ibleocare_token');localStorage.removeItem('ibleocare_token');window.location.href='/login.html';}});
+
+// Carica i dati dell'utente loggato SENZA fare redirect forzati
+function loadUserInfo() {
+    const user = localStorage.getItem('ibleocare_user') || 'Amministratore';
+    
+    const userNameEl = document.getElementById('userName');
+    const userRoleEl = document.getElementById('userRole');
+    
+    if (userNameEl) userNameEl.textContent = user;
+    if (userRoleEl) userRoleEl.textContent = 'Project Manager';
+}
+
+// Funzione di logout sicura
+async function logout() {
+    if (!confirm('Vuoi davvero uscire da IbleoCare?')) return;
+    
+    try {
+        await fetch('/api/logout', { method: 'POST' });
+        
+        localStorage.removeItem('ibleocare_login');
+        localStorage.removeItem('ibleocare_user');
+        
+        window.location.href = '/login.html';
+    } catch (err) {
+        console.error('Errore durante il logout:', err);
+        window.location.href = '/login.html';
+    }
+}
+
+// Assicuriamoci che loadUserInfo venga eseguito al caricamento della pagina
+document.addEventListener('DOMContentLoaded', () => {
+    loadUserInfo();
+});
+
+/* ================================================================
+   VALVOLE — Stato locale (BACKEND HOOK: fetch /api/valves)
+================================================================ */
+const VALVES = [
+    { id:'v1', name:'Pompa Irrigazione Serra 1', zone:'Serra A — Nodo 3',   icon:'bi-droplet-fill',  on: true  },
+    { id:'v2', name:'Pompa Campo Nord',          zone:'Campo Nord — Nodo 1', icon:'bi-moisture',      on: false },
+    { id:'v3', name:'Gocciolatori Balcone',      zone:'Zona Balcone — Nodo 5',icon:'bi-cloud-drizzle',on: false },
+    { id:'v4', name:'Irrigatori Campo Sud',      zone:'Campo Sud — Nodo 2',  icon:'bi-water',         on: true  },
+    { id:'v5', name:'Serbatoio Riserva',         zone:'Edificio Centrale',   icon:'bi-bucket-fill',   on: false },
+];
+
+function renderValves() {
+    const list = document.getElementById('valves-list');
+    list.innerHTML = VALVES.map(v => `
+        <div class="valve-row ${v.on ? 'active-valve' : ''}" id="row-${v.id}">
+            <div class="valve-icon" id="icon-${v.id}"><i class="bi ${v.icon}"></i></div>
+            <div class="valve-info">
+                <strong>${v.name}</strong>
+                <small><i class="bi bi-geo-alt me-1"></i>${v.zone}</small>
+            </div>
+            <span class="valve-status-text ${v.on?'on':'off'}" id="label-${v.id}">${v.on?'ON':'OFF'}</span>
+            <div class="form-check form-switch mb-0">
+                <input class="form-check-input" type="checkbox" id="sw-${v.id}" ${v.on?'checked':''}
+                       onchange="toggleValve('${v.id}', this.checked)">
+            </div>
+        </div>
+    `).join('');
+    updateValvesCount();
+}
+
+function toggleValve(id, state) {
+    // BACKEND HOOK: fetch('/api/valve/'+id, { method:'POST', body: JSON.stringify({ on: state }) })
+    const v = VALVES.find(x=>x.id===id);
+    if (!v) return;
+    v.on = state;
+    const row   = document.getElementById('row-'+id);
+    const label = document.getElementById('label-'+id);
+    row.classList.toggle('active-valve', state);
+    label.textContent = state ? 'ON' : 'OFF';
+    label.className = `valve-status-text ${state?'on':'off'}`;
+    updateValvesCount();
+    addLogLine(state ? 'success' : 'info', `Valvola "${v.name}" ${state?'ATTIVATA':'DISATTIVATA'} manualmente`);
+}
+
+function setAllValves(state) {
+    VALVES.forEach(v => { v.on = state; document.getElementById('sw-'+v.id).checked = state; toggleValve(v.id, state); });
+}
+
+function updateValvesCount() {
+    const active = VALVES.filter(v=>v.on).length;
+    document.getElementById('valves-on-count').textContent = active + ' attiv' + (active===1?'a':'e');
+}
+
+/* ================================================================
+   DAYS SELECTOR
+================================================================ */
+function initDaysSelector() {
+    const days = ['Lu','Ma','Me','Gi','Ve','Sa','Do'];
+    const container = document.getElementById('days-selector');
+    container.innerHTML = days.map((d,i) => `
+        <button type="button" class="btn btn-sm rounded-circle fw-bold ${i<5?'btn-success':'btn-outline-secondary'}"
+                style="width:34px;height:34px;padding:0;font-size:0.75rem"
+                onclick="this.classList.toggle('btn-success');this.classList.toggle('btn-outline-secondary')">${d}</button>
+    `).join('');
+}
+
+function saveSchedule() {
+    addLogLine('success', 'Programmazione salvata e inviata al broker MQTT');
+    showToast('Programmazione salvata!', 'success');
+}
+
+/* ================================================================
+   CONSOLE MQTT
+================================================================ */
+const PRESETS = {
+    ping:      { topic:'ibleocare/broadcast/cmd',  payload:'{\n  "action": "ping",\n  "ts": ""\n}' },
+    status:    { topic:'ibleocare/broadcast/cmd',  payload:'{\n  "action": "get_status"\n}' },
+    restart:   { topic:'ibleocare/broadcast/cmd',  payload:'{\n  "action": "restart",\n  "delay_ms": 1000\n}' },
+    calibrate: { topic:'ibleocare/broadcast/cmd',  payload:'{\n  "action": "calibrate_soil",\n  "dry_value": 3800,\n  "wet_value": 1600\n}' },
+};
+
+function loadPreset(key) {
+    const p = PRESETS[key];
+    if (!p) return;
+    document.getElementById('mqtt-topic').value   = p.topic;
+    document.getElementById('mqtt-payload').value = p.payload;
+}
+
+function sendMQTTCommand() {
+    // BACKEND HOOK: fetch('/api/mqtt/publish', { method:'POST', body: JSON.stringify({ topic, payload }) })
+    const topic   = document.getElementById('mqtt-topic').value.trim();
+    const payload = document.getElementById('mqtt-payload').value.trim();
+    const btn     = document.getElementById('btn-send-mqtt');
+
+    if (!topic) { addLogLine('error','Errore: il campo Topic MQTT è obbligatorio.'); return; }
+    let parsedPayload;
+    try { parsedPayload = JSON.parse(payload); } catch(e) { addLogLine('error','Errore: il Payload non è un JSON valido.'); return; }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Invio…';
+
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-send-fill me-2"></i>Invia Comando MQTT';
+        addLogLine('success', `Pubblicato su [${topic}] → ${JSON.stringify(parsedPayload)}`);
+        addLogLine('info', `ACK ricevuto da broker (simulato) — QoS 1`);
+    }, 800);
+}
+
+function addLogLine(type, msg) {
+    const log = document.getElementById('console-log');
+    const ts  = new Date().toLocaleTimeString('it-IT');
+    const div = document.createElement('div');
+    div.className = `log-line ${type}`;
+    div.innerHTML = `<span class="ts">[${ts}]</span><span class="msg">${msg}</span>`;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+}
+
+function clearLog() {
+    document.getElementById('console-log').innerHTML = '';
+    addLogLine('info', 'Log pulito.');
+}
+
+/* ================================================================
+   MODALITÀ SISTEMA
+================================================================ */
+function toggleSystemMode(el, mode) {
+    const labels = { auto:'Irrigazione Automatica', alerts:'Allarmi Push', cloud:'Sync Cloud' };
+    addLogLine(el.checked ? 'success' : 'warn', `${labels[mode]}: ${el.checked ? 'ATTIVATO' : 'DISATTIVATO'}`);
+    // BACKEND HOOK: fetch('/api/settings/'+mode, { method:'POST', body: JSON.stringify({ enabled: el.checked }) })
+}
+
+function showToast(msg, type) {
+    const div = Object.assign(document.createElement('div'), {
+        className: `toast align-items-center text-bg-${type==='success'?'success':'warning'} border-0 show position-fixed bottom-0 end-0 m-3`,
+        style: 'z-index:9999',
+        innerHTML: `<div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.closest('.toast').remove()"></button></div>`
+    });
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 3000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadUserInfo();
+    updateMQTTStatus('connected');
+    renderValves();
+    initDaysSelector();
+    document.getElementById('log-init-ts').textContent = new Date().toLocaleTimeString('it-IT');
+    // Aggiorna ts nel payload
+    const payload = document.getElementById('mqtt-payload');
+    payload.value = payload.value.replace('"ts": ""', `"ts": "${new Date().toISOString()}"`);
+});
+</script>
+
+</body>
+</html>

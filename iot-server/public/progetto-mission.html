@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission &amp; Obiettivi — IbleoCare</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root { --primary-green: #20c997; --dark-green: #0a2e1c; --earth-brown: #8B4513; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; scroll-behavior: smooth; background-color: #f8fbf9; padding-top: 80px; }
+        .navbar { background: rgba(10,46,28,0.97) !important; position: fixed; top: 0; width: 100%; z-index: 1000; padding-top: 10px; padding-bottom: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.3); }
+        .nav-link { color: rgba(255,255,255,0.9) !important; font-weight: 500; font-size: 1.05rem; margin: 0 3px; transition: color 0.3s; }
+        .nav-link:hover, .nav-link:focus { color: var(--primary-green) !important; }
+        .dropdown-menu { background-color: rgba(10,46,28,0.97); border: 1px solid rgba(32,201,151,0.2); backdrop-filter: blur(10px); }
+        .dropdown-item { color: white; transition: background 0.2s, padding-left 0.2s; }
+        .dropdown-item:hover { background-color: rgba(32,201,151,0.2); color: var(--primary-green); padding-left: 20px; }
+        .offcanvas-end { background-color: var(--dark-green); color: white; border-left: 4px solid var(--primary-green); }
+        .navbar-toggler { border: none; box-shadow: none !important; }
+        .navbar-toggler-icon { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e"); }
+
+        /* HERO */
+        .page-hero { padding: 70px 0 60px; color: white; position: relative; overflow: hidden; }
+        .page-hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--dark-green) 0%, #0d4a2a 100%); z-index: 0; }
+        /* Cerchi decorativi sfondo hero */
+        .page-hero::after { content: ''; position: absolute; top: -60px; right: -60px; width: 320px; height: 320px; border-radius: 50%; border: 2px solid rgba(32,201,151,0.15); z-index: 0; }
+        .page-hero .container { position: relative; z-index: 1; }
+        .hero-circle { position: absolute; border-radius: 50%; border: 1px solid rgba(32,201,151,0.1); }
+
+        .breadcrumb-item a { color: var(--primary-green); text-decoration: none; }
+        .breadcrumb-item.active { color: rgba(255,255,255,0.7); }
+        .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.4); }
+
+        section { padding: 80px 0; }
+        .section-title { font-weight: 800; position: relative; margin-bottom: 60px; text-align: center; color: var(--dark-green); text-transform: uppercase; letter-spacing: 2px; }
+        .section-title::after { content: ''; width: 80px; height: 4px; background: var(--primary-green); position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); border-radius: 2px; }
+
+        /* MISSION STATEMENT */
+        .mission-statement { background: var(--dark-green); border-radius: 24px; padding: 60px 50px; position: relative; overflow: hidden; }
+        .mission-statement::before { content: '"'; position: absolute; top: -20px; left: 30px; font-size: 14rem; color: rgba(32,201,151,0.07); font-family: Georgia, serif; line-height: 1; }
+        .mission-text { font-size: 1.45rem; font-weight: 300; line-height: 1.8; color: rgba(255,255,255,0.9); position: relative; z-index: 1; }
+        .mission-text strong { color: var(--primary-green); font-weight: 700; }
+
+        /* VALUE PILLARS */
+        .pillar-card { background: white; border-radius: 20px; padding: 36px 28px; text-align: center; box-shadow: 0 5px 25px rgba(0,0,0,0.07); border-bottom: 4px solid transparent; transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s; height: 100%; }
+        .pillar-card:hover { transform: translateY(-8px); box-shadow: 0 18px 40px rgba(0,0,0,0.12); border-bottom-color: var(--primary-green); }
+        .pillar-icon { width: 80px; height: 80px; border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 24px; }
+        .pillar-icon.green  { background: rgba(32,201,151,0.12); color: var(--primary-green); }
+        .pillar-icon.blue   { background: rgba(13,110,253,0.1);  color: #0d6efd; }
+        .pillar-icon.brown  { background: rgba(139,69,19,0.1);   color: var(--earth-brown); }
+
+        /* OBIETTIVI — barre numeriche */
+        .obiettivo-card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.07); border-left: 5px solid var(--primary-green); transition: transform 0.3s; }
+        .obiettivo-card:hover { transform: translateX(6px); }
+        .obiettivo-num { font-size: 3rem; font-weight: 900; color: var(--primary-green); line-height: 1; }
+        .obiettivo-unit { font-size: 1.1rem; font-weight: 600; color: var(--dark-green); }
+        .obiettivo-desc { color: #555; font-size: 0.92rem; margin-top: 6px; }
+        .progress-custom { height: 8px; border-radius: 4px; background: rgba(32,201,151,0.15); overflow: visible; }
+        .progress-bar-custom { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--primary-green), #0d9e72); transition: width 1.4s ease; position: relative; }
+
+        /* VALORI SECTION */
+        .value-chip { display: inline-flex; align-items: center; gap: 8px; background: rgba(32,201,151,0.08); border: 1px solid rgba(32,201,151,0.25); border-radius: 50px; padding: 10px 20px; font-size: 0.9rem; font-weight: 600; color: var(--dark-green); margin: 5px; transition: background 0.2s; }
+        .value-chip:hover { background: rgba(32,201,151,0.18); }
+        .value-chip i { color: var(--primary-green); }
+
+        /* CTA FINALE */
+        .cta-section { background: var(--dark-green); }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark" id="mainNav">
+    <div class="container-fluid px-4 px-lg-5">
+        <a class="navbar-brand" href="index.html">
+            <img src="icon.svg" alt="Logo IbleoCare" height="60" style="filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5));">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+            <div class="offcanvas-header border-bottom border-success border-opacity-25 p-4">
+                <h5 class="offcanvas-title fw-bold text-success" id="offcanvasNavbarLabel"><i class="bi bi-tree-fill me-2"></i>IbleoCare</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <ul class="navbar-nav justify-content-end align-items-lg-center flex-grow-1 pe-3 gap-2">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">Il Progetto</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="progetto-descrizione.html">Descrizione Generale</a></li>
+                            <li><a class="dropdown-item active" href="progetto-mission.html">Mission &amp; Obiettivi</a></li>
+                            <li><a class="dropdown-item" href="progetto-prototipo.html">Prototipo Arduino R4</a></li>
+                            <li><a class="dropdown-item" href="progetto-prodotto-finito.html">Prodotto Finito PCB</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">La Soluzione</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="soluzione-problema.html">Il Problema</a></li>
+                            <li><a class="dropdown-item" href="soluzione-funzionamento.html">Come Funziona</a></li>
+                            <li><a class="dropdown-item" href="soluzione-tecnologie.html">Tecnologie &amp; Componenti</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Business</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="business-valore.html">Value Proposition</a></li>
+                            <li><a class="dropdown-item" href="business-mercato.html">Mercato</a></li>
+                            <li><a class="dropdown-item" href="business-prezzi.html">Costi e Prezzi</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#chisiamo">Chi Siamo</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#contatti">Contatti</a></li>
+                    <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
+                        <a href="/login.html" class="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm w-100">
+                            <i class="bi bi-lock-fill me-1"></i> Area Privata
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+    <div class="hero-circle" style="width:500px;height:500px;bottom:-200px;left:-100px;"></div>
+    <div class="hero-circle" style="width:200px;height:200px;top:20px;right:200px;"></div>
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item"><a href="progetto-descrizione.html">Il Progetto</a></li>
+                <li class="breadcrumb-item active">Mission &amp; Obiettivi</li>
+            </ol>
+        </nav>
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <span class="badge rounded-pill px-3 py-2 mb-3 fw-semibold" style="background:rgba(32,201,151,0.2);color:var(--primary-green);border:1px solid rgba(32,201,151,0.35);">
+                    <i class="bi bi-bullseye me-1"></i> Il Nostro Scopo
+                </span>
+                <h1 class="display-4 fw-black mb-3" style="font-weight:900;">Mission <span style="color:var(--primary-green)">&amp;</span><br>Obiettivi</h1>
+                <p class="lead opacity-75 mb-0">Non stiamo solo costruendo un gadget IoT. Stiamo ridisegnando il rapporto tra tecnologia e terra — per sprecare meno, coltivare meglio e lasciare un pianeta più sano.</p>
+            </div>
+            <div class="col-lg-5 text-center">
+                <div style="font-size:7rem;line-height:1;filter:drop-shadow(0 8px 24px rgba(32,201,151,0.3));">🌿</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SEZIONE 1: MISSION STATEMENT -->
+<section style="background:#f8fbf9;">
+    <div class="container">
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-9">
+                <div class="mission-statement">
+                    <p class="mission-text">
+                        La nostra missione è rendere la <strong>tecnologia IoT accessibile a ogni agricoltore</strong> — dal piccolo orticoltore alla grande azienda agroindustriale — per eliminare lo spreco d'acqua, <strong>salvaguardare la salute delle piante</strong> e garantire un monitoraggio continuo da qualsiasi posto nel mondo, direttamente dal proprio smartphone.
+                    </p>
+                    <div class="d-flex align-items-center gap-3 mt-4 position-relative" style="z-index:1;">
+                        <div style="width:48px;height:48px;border-radius:50%;background:rgba(32,201,151,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="bi bi-tree-fill text-success fs-5"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-white mb-0" style="font-size:0.85rem;">Team IbleoCare</div>
+                            <div style="color:rgba(255,255,255,0.4);font-size:0.8rem;">Progetto JA Italia · 2026</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- I TRE PILASTRI -->
+        <h2 class="section-title">I Tre Pilastri</h2>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-4">
+                <div class="pillar-card">
+                    <div class="pillar-icon green"><i class="bi bi-droplet-fill"></i></div>
+                    <h4 class="fw-bold mb-3" style="color:var(--dark-green)">Risparmio Idrico</h4>
+                    <p class="text-muted">Irrigare solo quando il suolo ne ha davvero bisogno. Basta cicli programmati a orario fisso: i nostri sensori leggono la realtà e il sistema agisce di conseguenza, riducendo i consumi idrici stimati fino al <strong>40%</strong>.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="pillar-card">
+                    <div class="pillar-icon blue"><i class="bi bi-activity"></i></div>
+                    <h4 class="fw-bold mb-3" style="color:var(--dark-green)">Salute delle Piante</h4>
+                    <p class="text-muted">L'asfissia radicale da sovra-irrigazione è una delle prime cause di perdita del raccolto. IbleoCare monitora in tempo reale il livello di umidità e invia allerta immediata prima che il danno sia irreversibile.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="pillar-card">
+                    <div class="pillar-icon brown"><i class="bi bi-phone-fill"></i></div>
+                    <h4 class="fw-bold mb-3" style="color:var(--dark-green)">Monitoraggio Remoto H24</h4>
+                    <p class="text-muted">Dashboard accessibile da smartphone, tablet o browser ovunque ci sia connessione. Dati in diretta, storico, notifiche push: la tua coltivazione sotto controllo anche dall'altro capo del mondo.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SEZIONE 2: OBIETTIVI NUMERICI -->
+<section style="background:var(--dark-green);">
+    <div class="container">
+        <h2 class="section-title text-white" style="color:white!important">Obiettivi Misurabili</h2>
+        <div class="row g-4 mt-2">
+            <div class="col-md-4">
+                <div class="obiettivo-card">
+                    <div class="obiettivo-num">−40%</div>
+                    <div class="obiettivo-unit">Consumo Idrico</div>
+                    <div class="obiettivo-desc">Riduzione stimata dei consumi d'acqua per irrigazione rispetto a sistemi tradizionali a timer fisso.</div>
+                    <div class="mt-3 progress-custom">
+                        <div class="progress-bar-custom" style="width:40%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="obiettivo-card" style="border-left-color:#0d6efd;">
+                    <div class="obiettivo-num" style="color:#0d6efd;">0%</div>
+                    <div class="obiettivo-unit">Mortalità da Asfissia</div>
+                    <div class="obiettivo-desc">Azzeramento della mortalità delle piante causata da sovra-irrigazione e asfissia radicale nelle colture monitorate.</div>
+                    <div class="mt-3 progress-custom" style="background:rgba(13,110,253,0.15);">
+                        <div class="progress-bar-custom" style="width:100%;background:linear-gradient(90deg,#0d6efd,#0a58ca)"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="obiettivo-card" style="border-left-color:var(--earth-brown);">
+                    <div class="obiettivo-num" style="color:var(--earth-brown);">H24</div>
+                    <div class="obiettivo-unit">Monitoraggio Globale</div>
+                    <div class="obiettivo-desc">Accesso ai dati da qualsiasi dispositivo connesso, in qualsiasi paese, con notifiche push in tempo reale a ogni evento critico.</div>
+                    <div class="mt-3 progress-custom" style="background:rgba(139,69,19,0.12);">
+                        <div class="progress-bar-custom" style="width:100%;background:linear-gradient(90deg,var(--earth-brown),#a0522d)"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SEZIONE 3: VALORI DEL PROGETTO -->
+<section style="background:#f8fbf9;">
+    <div class="container">
+        <h2 class="section-title">I Nostri Valori</h2>
+        <div class="row justify-content-center mt-3">
+            <div class="col-lg-9 text-center">
+                <p class="text-muted fs-5 mb-5">IbleoCare nasce da una scuola tecnica siciliana. Ogni scelta progettuale riflette i valori del nostro territorio e la nostra visione del futuro.</p>
+                <div>
+                    <span class="value-chip"><i class="bi bi-recycle"></i> Sostenibilità Ambientale</span>
+                    <span class="value-chip"><i class="bi bi-people-fill"></i> Accessibilità Economica</span>
+                    <span class="value-chip"><i class="bi bi-lightbulb-fill"></i> Innovazione Aperta</span>
+                    <span class="value-chip"><i class="bi bi-shield-check"></i> Affidabilità dei Dati</span>
+                    <span class="value-chip"><i class="bi bi-geo-alt-fill"></i> Radici nel Territorio</span>
+                    <span class="value-chip"><i class="bi bi-graph-up-arrow"></i> Crescita Continua</span>
+                    <span class="value-chip"><i class="bi bi-heart-fill"></i> Amore per la Terra</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section py-5">
+    <div class="container text-white text-center py-3">
+        <h2 class="fw-bold mb-3">Dalla Visione all'Hardware</h2>
+        <p class="opacity-75 mb-4 fs-5">Scopri come abbiamo tradotto questa missione nel nostro primo prototipo funzionante.</p>
+        <a href="progetto-prototipo.html" class="btn btn-success btn-lg rounded-pill px-5 fw-bold shadow-sm">
+            Vedi il Prototipo <i class="bi bi-arrow-right ms-2"></i>
+        </a>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-dark text-white py-5 border-top border-success border-5">
+    <div class="container text-center text-md-start">
+        <div class="row g-4 align-items-center">
+            <div class="col-md-4 text-center text-md-start">
+                <h3 class="fw-bold text-success mb-2">🌿 IbleoCare</h3>
+                <p class="small opacity-50 mb-0">L'IoT che rispetta la natura.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <a href="/login.html" class="btn btn-outline-success rounded-pill px-4">Accesso Portale Privato</a>
+            </div>
+            <div class="col-md-4 text-center text-md-end">
+                <p class="mb-0 small opacity-50">&copy; 2026 IbleoCare Project.<br>Team JA Italia.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

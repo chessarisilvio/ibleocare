@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisi di Mercato — IbleoCare</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root { --primary-green: #20c997; --dark-green: #0a2e1c; --earth-brown: #8B4513; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; scroll-behavior: smooth; background-color: #f8fbf9; padding-top: 80px; }
+        .navbar { background: rgba(10, 46, 28, 0.97) !important; position: fixed; top: 0; width: 100%; z-index: 1000; padding-top: 10px; padding-bottom: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.3); transition: padding 0.3s; }
+        .nav-link { color: rgba(255,255,255,0.9) !important; font-weight: 500; font-size: 1.05rem; margin: 0 3px; transition: color 0.3s; }
+        .nav-link:hover, .nav-link:focus { color: var(--primary-green) !important; }
+        .dropdown-menu { background-color: rgba(10, 46, 28, 0.97); border: 1px solid rgba(32, 201, 151, 0.2); backdrop-filter: blur(10px); }
+        .dropdown-item { color: white; transition: background 0.2s, padding-left 0.2s; }
+        .dropdown-item:hover { background-color: rgba(32, 201, 151, 0.2); color: var(--primary-green); padding-left: 20px; }
+        .offcanvas-end { background-color: var(--dark-green); color: white; border-left: 4px solid var(--primary-green); }
+        .navbar-toggler { border: none; box-shadow: none !important; }
+        .navbar-toggler-icon { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e"); }
+        .page-hero { padding: 60px 0 50px 0; color: white; position: relative; overflow: hidden; }
+        .page-hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--dark-green) 0%, #0d4a2a 100%); z-index: 0; }
+        .page-hero .container { position: relative; z-index: 1; }
+        .section-title { font-weight: 800; position: relative; margin-bottom: 60px; text-align: center; color: var(--dark-green); text-transform: uppercase; letter-spacing: 2px; }
+        .section-title::after { content: ''; width: 80px; height: 4px; background: var(--primary-green); position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); border-radius: 2px; }
+        section { padding: 80px 0; }
+        .card-custom { border: none; transition: transform 0.3s, box-shadow 0.3s; border-radius: 15px; overflow: hidden; }
+        .card-custom:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        .breadcrumb-item a { color: var(--primary-green); text-decoration: none; }
+        .breadcrumb-item.active { color: rgba(255,255,255,0.7); }
+        .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.4); }
+        .price-tag { padding: 15px 25px; border-radius: 50px; font-size: 1.2rem; font-weight: bold; display: inline-block; box-shadow: 0 5px 15px rgba(32,201,151,0.3); text-transform: uppercase; letter-spacing: 1px; }
+        .value-card { border-radius: 16px; border: none; padding: 35px 30px; box-shadow: 0 5px 25px rgba(0,0,0,0.07); transition: transform 0.3s; }
+        .value-card:hover { transform: translateY(-6px); }
+        .market-segment { border-radius: 20px; padding: 40px; border: 2px solid transparent; transition: border-color 0.3s; }
+        .market-segment:hover { border-color: var(--primary-green); }
+        .pricing-plan { border-radius: 20px; border: 2px solid #e8f5e9; padding: 40px 30px; text-align: center; transition: transform 0.3s, box-shadow 0.3s; position: relative; overflow: hidden; }
+        .pricing-plan.featured { border-color: var(--primary-green); transform: scale(1.03); box-shadow: 0 20px 50px rgba(32,201,151,0.2); }
+        .pricing-plan .plan-price { font-size: 3rem; font-weight: 800; color: var(--dark-green); }
+        .pricing-plan .plan-price sup { font-size: 1.5rem; }
+        .pricing-plan .plan-price small { font-size: 1rem; color: #999; font-weight: 400; }
+        .roi-bar { height: 14px; border-radius: 7px; background: linear-gradient(90deg, var(--primary-green), #0d4a2a); }
+        .stat-block { border-radius: 16px; padding: 35px 25px; text-align: center; }
+        .stat-block .stat-number { font-size: 2.8rem; font-weight: 900; color: var(--primary-green); line-height: 1; }
+        .stat-block .stat-desc { font-size: 0.9rem; opacity: 0.75; margin-top: 8px; }
+        .scale-card { border-radius: 16px; border: 2px solid #e8f5e9; padding: 30px 25px; transition: border-color 0.3s, transform 0.3s; }
+        .scale-card:hover { border-color: var(--primary-green); transform: translateY(-5px); }
+        .scale-level { display: inline-block; width: 40px; height: 40px; border-radius: 50%; background: var(--primary-green); color: white; font-weight: 900; font-size: 1.2rem; text-align: center; line-height: 40px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark" id="mainNav">
+    <div class="container-fluid px-4 px-lg-5">
+        <a class="navbar-brand" href="index.html">
+            <img src="icon.svg" alt="Logo IbleoCare" height="60" style="filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5));">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+            <div class="offcanvas-header border-bottom border-success border-opacity-25 p-4">
+                <h5 class="offcanvas-title fw-bold text-success" id="offcanvasNavbarLabel"><i class="bi bi-tree-fill me-2"></i>IbleoCare</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <ul class="navbar-nav justify-content-end align-items-lg-center flex-grow-1 pe-3 gap-2">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Il Progetto</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="progetto-descrizione.html">Descrizione Generale</a></li>
+                            <li><a class="dropdown-item" href="progetto-mission.html">Mission &amp; Obiettivi</a></li>
+                            <li><a class="dropdown-item" href="progetto-prototipo.html">Prototipo Arduino R4</a></li>
+                            <li><a class="dropdown-item" href="progetto-prodotto-finito.html">Prodotto Finito PCB</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">La Soluzione</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="soluzione-problema.html">Il Problema</a></li>
+                            <li><a class="dropdown-item" href="soluzione-funzionamento.html">Come Funziona</a></li>
+                            <li><a class="dropdown-item" href="soluzione-tecnologie.html">Tecnologie &amp; Componenti</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Business</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="business-valore.html">Value Proposition</a></li>
+                            <li><a class="dropdown-item" href="business-mercato.html">Mercato</a></li>
+                            <li><a class="dropdown-item" href="business-prezzi.html">Costi e Prezzi</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#chisiamo">Chi Siamo</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#contatti">Contatti</a></li>
+                    <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
+                        <a href="/login.html" class="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm w-100">
+                            <i class="bi bi-lock-fill me-1"></i> Area Privata
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item"><a href="#">Business</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Mercato</li>
+            </ol>
+        </nav>
+        <span class="badge bg-success text-uppercase px-3 py-2 mb-3 fs-6">Business</span>
+        <h1 class="display-4 fw-bold mb-3">Il Nostro Mercato</h1>
+        <p class="lead opacity-75 mb-0">B2C + B2B: una soluzione scalabile per ogni esigenza.</p>
+    </div>
+</div>
+
+<!-- SECTION 1: Il Mercato IoT Agricolo -->
+<section style="background: white;">
+    <div class="container">
+        <h2 class="section-title">Un Mercato in Esplosione</h2>
+        <div class="row g-4 mb-5">
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-block" style="background: var(--dark-green);">
+                    <div class="stat-number">€ 22 Mld</div>
+                    <div class="stat-desc text-white">Mercato globale AgriTech IoT nel 2026</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-block" style="background: var(--dark-green);">
+                    <div class="stat-number">+18%</div>
+                    <div class="stat-desc text-white">Crescita annua stimata (CAGR) del settore</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-block" style="background: var(--dark-green);">
+                    <div class="stat-number">2.5 Mln</div>
+                    <div class="stat-desc text-white">Dispositivi IoT agricoli attivi in Europa</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-block" style="background: var(--dark-green);">
+                    <div class="stat-number">€ 850 Mln</div>
+                    <div class="stat-desc text-white">Valore mercato smart irrigation solo in Italia (2025)</div>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <p class="lead text-center text-muted">
+                    Il mercato dell'AgriTech è in rapida espansione, trainato dalla crescente consapevolezza ambientale, dagli incentivi governativi per l'agricoltura di precisione e dalla digitalizzazione delle PMI agricole. IbleoCare si posiziona in questo mercato con un prodotto accessibile (<strong>€149</strong>) e una proposta di valore chiara.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 2: Segmento B2C -->
+<section style="background: #f8fbf9;">
+    <div class="container">
+        <h2 class="section-title">Segmento B2C — Il Privato Appassionato</h2>
+        <div class="market-segment bg-white shadow-sm mt-2">
+            <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
+                <span class="badge bg-success fs-6 px-3 py-2">B2C</span>
+                <i class="bi bi-house-heart display-5 text-success"></i>
+                <div>
+                    <h4 class="fw-bold mb-1" style="color: var(--dark-green);">Hobbisti, Balconi, Terrazzi, Orti Urbani</h4>
+                    <p class="text-muted mb-0">Il mercato consumer del giardinaggio intelligente</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h5 class="fw-bold text-success mb-3"><i class="bi bi-person-check me-2"></i>Profilo del Cliente</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="bi bi-dot text-success fs-4 me-1 align-middle"></i><strong>Target:</strong> 25–65 anni, proprietario di casa con giardino o terrazzo</li>
+                        <li class="mb-2"><i class="bi bi-dot text-success fs-4 me-1 align-middle"></i><strong>Motivazione principale:</strong> salvare le piante durante le vacanze o l'assenza prolungata</li>
+                        <li class="mb-2"><i class="bi bi-dot text-success fs-4 me-1 align-middle"></i><strong>Problema chiave:</strong> "non so se le ho annaffiate troppo o troppo poco"</li>
+                        <li class="mb-2"><i class="bi bi-dot text-success fs-4 me-1 align-middle"></i><strong>Budget:</strong> disposto a spendere €100–200 per un gadget tech di qualità</li>
+                        <li class="mb-2"><i class="bi bi-dot text-success fs-4 me-1 align-middle"></i><strong>Canale preferito:</strong> e-commerce (Amazon, Leroy Merlin online), negozi specialty</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="fw-bold text-success mb-3"><i class="bi bi-bar-chart me-2"></i>Stima di Mercato</h5>
+                    <div class="p-3 rounded-3 mb-2" style="background:#f0faf5;">
+                        <strong>12 milioni</strong> di famiglie italiane hanno un giardino/terrazzo
+                    </div>
+                    <div class="p-3 rounded-3 mb-2" style="background:#f0faf5;">
+                        <strong>4.2 milioni</strong> di italiani si definiscono "appassionati di giardinaggio"
+                    </div>
+                    <div class="p-3 rounded-3 mb-2" style="background:#f0faf5;">
+                        Penetrazione stimata IbleoCare: <strong>0.5%</strong> → <strong>21.000 unità potenziali</strong> nel primo anno in Italia
+                    </div>
+                    <div class="p-3 rounded-3" style="background: var(--dark-green); color:white;">
+                        Prezzo medio €149 → <strong class="text-success">Revenue potenziale: €3.1M/anno</strong>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <h6 class="fw-bold text-success mb-3">USP per questo segmento:</h6>
+            <div class="d-flex flex-wrap gap-2">
+                <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2">Setup 5 minuti</span>
+                <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2">Nessuna competenza richiesta</span>
+                <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2">App intuitiva</span>
+                <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2">Alert WhatsApp/email</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 3: Segmento B2B -->
+<section style="background: white;">
+    <div class="container">
+        <h2 class="section-title">Segmento B2B — Le Aziende del Verde</h2>
+        <div class="market-segment bg-light shadow-sm mt-2">
+            <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
+                <span class="badge bg-primary fs-6 px-3 py-2">B2B</span>
+                <i class="bi bi-building display-5 text-primary"></i>
+                <div>
+                    <h4 class="fw-bold mb-1" style="color: var(--dark-green);">Serre, Vivai, Aziende Agricole, Agriturismi</h4>
+                    <p class="text-muted mb-0">Il mercato professionale dell'irrigazione di precisione</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h5 class="fw-bold text-primary mb-3"><i class="bi bi-building-check me-2"></i>Profilo del Cliente</h5>
+                    <div class="mb-3 p-3 rounded-3 bg-white border-start border-primary border-3">
+                        <strong>Target A:</strong> Vivai e serre — 50–500 piante da gestire, spesa acqua €2.000–20.000/anno
+                    </div>
+                    <div class="mb-3 p-3 rounded-3 bg-white border-start border-primary border-3">
+                        <strong>Target B:</strong> Grandi aziende agricole — &gt;5 ettari, personale dedicato, sfide logistiche
+                    </div>
+                    <div class="p-3 rounded-3 bg-white border-start border-primary border-3">
+                        <strong>Target C:</strong> Agriturismi e resort — giardini ornamentali di valore, reputazione del verde
+                    </div>
+                    <p class="text-muted small mt-3"><strong>Canale:</strong> vendita diretta, fiere di settore, installatori certificati</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="fw-bold text-primary mb-3"><i class="bi bi-graph-up-arrow me-2"></i>Opportunità B2B</h5>
+                    <div class="p-3 rounded-3 mb-2" style="background:#f0f4ff;">
+                        Risparmio medio per un vivaio: <strong>€3.000–8.000/anno</strong> in acqua e manodopera
+                    </div>
+                    <div class="p-3 rounded-3 mb-2" style="background:#f0f4ff;">
+                        ROI per il B2B: <strong>3–6 mesi</strong> (acquisto singolo sistema da €500–1.500)
+                    </div>
+                    <div class="p-3 rounded-3 mb-2" style="background:#f0f4ff;">
+                        Opportunità: contratto di manutenzione annuale (SaaS dashboard: <strong>€9.90/mese/azienda</strong>)
+                    </div>
+                    <div class="p-3 rounded-3" style="background: var(--dark-green); color:white;">
+                        Pipeline: <strong class="text-success">3 vivai locali</strong> già in fase di trattativa (zona iblea)
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <h6 class="fw-bold text-primary mb-3">Vantaggi specifici B2B:</h6>
+            <div class="d-flex flex-wrap gap-2">
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-3 py-2">API per integrazione ERP</span>
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-3 py-2">Dashboard multi-site</span>
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-3 py-2">Report mensili PDF automatici</span>
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-3 py-2">Assistenza tecnica prioritaria</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 4: Scalabilità -->
+<section style="background: #f8fbf9;">
+    <div class="container">
+        <h2 class="section-title">Da 1 Sensore a 1.000</h2>
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 text-center">
+                <p class="lead text-muted">
+                    L'architettura MQTT di IbleoCare è progettata per scalare senza limiti. Un singolo broker gestisce migliaia di dispositivi con latenza sub-secondo e zero degradazione delle prestazioni.
+                </p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="scale-card bg-white h-100">
+                    <div class="scale-level">1</div>
+                    <h5 class="fw-bold mb-1" style="color: var(--dark-green);">Starter</h5>
+                    <p class="text-success fw-semibold small mb-3">1 – 5 sensori</p>
+                    <p class="text-muted">Il piano base per hobbisti. Un singolo Hub WiFi gestisce fino a 5 sensori del suolo in un raggio di 30 metri. Dashboard con 7 giorni di storico.</p>
+                    <div class="mt-3">
+                        <span class="badge bg-success bg-opacity-10 text-success">Dashboard Web</span>
+                        <span class="badge bg-success bg-opacity-10 text-success ms-1">Storico 7gg</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="scale-card bg-white h-100" style="border-color: var(--primary-green);">
+                    <div class="scale-level">2</div>
+                    <h5 class="fw-bold mb-1" style="color: var(--dark-green);">Pro</h5>
+                    <p class="text-success fw-semibold small mb-3">6 – 50 sensori</p>
+                    <p class="text-muted">Per serre e vivai. Hub multipli connessi sullo stesso account. Dashboard unificata, storico 90 giorni, alert SMS, report settimanali automatici.</p>
+                    <div class="mt-3">
+                        <span class="badge bg-success bg-opacity-10 text-success">Multi-hub</span>
+                        <span class="badge bg-success bg-opacity-10 text-success ms-1">Storico 90gg</span>
+                        <span class="badge bg-success bg-opacity-10 text-success ms-1">Alert SMS</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="scale-card bg-white h-100">
+                    <div class="scale-level">3</div>
+                    <h5 class="fw-bold mb-1" style="color: var(--dark-green);">Enterprise</h5>
+                    <p class="text-success fw-semibold small mb-3">50+ sensori</p>
+                    <p class="text-muted">Per grandi aziende agricole. Architettura cloud dedicata, SLA 99.9%, API REST full-access, integrazione con sistemi di irrigazione automatica esistenti, supporto on-site.</p>
+                    <div class="mt-3">
+                        <span class="badge bg-success bg-opacity-10 text-success">SLA 99.9%</span>
+                        <span class="badge bg-success bg-opacity-10 text-success ms-1">API REST</span>
+                        <span class="badge bg-success bg-opacity-10 text-success ms-1">On-site</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="alert alert-success border-0 mt-4 text-center shadow-sm" role="alert">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            <strong>L'architettura MQTT è progettata per gestire migliaia di dispositivi senza modifiche lato server. La scalabilità è built-in.</strong>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 5: Posizionamento Competitivo -->
+<section style="background: var(--dark-green);">
+    <div class="container">
+        <h2 class="section-title" style="color: white;">IbleoCare vs Concorrenti</h2>
+        <div class="row justify-content-center mt-2">
+            <div class="col-lg-12">
+                <div class="table-responsive rounded-3 overflow-hidden shadow-lg">
+                    <table class="table table-dark table-striped mb-0 align-middle">
+                        <thead>
+                            <tr style="background: rgba(32,201,151,0.2);">
+                                <th class="py-3 px-3">Competitor</th>
+                                <th class="py-3 px-3 text-center">Prezzo</th>
+                                <th class="py-3 px-3 text-center">IoT Native</th>
+                                <th class="py-3 px-3 text-center">Dashboard</th>
+                                <th class="py-3 px-3 text-center">Open-Source Friendly</th>
+                                <th class="py-3 px-3 text-center">Supporto Locale</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: rgba(32,201,151,0.1);">
+                                <td class="px-3 py-3 fw-bold text-success">IbleoCare</td>
+                                <td class="px-3 py-3 text-center fw-bold">€149</td>
+                                <td class="px-3 py-3 text-center"><span class="badge bg-success">✓ MQTT</span></td>
+                                <td class="px-3 py-3 text-center"><span class="badge bg-success">✓ Web App</span></td>
+                                <td class="px-3 py-3 text-center"><span class="badge bg-success">✓</span></td>
+                                <td class="px-3 py-3 text-center"><span class="badge bg-success">✓ Sicilia/Italia</span></td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-3">Sensore generico Amazon</td>
+                                <td class="px-3 py-3 text-center">€25–40</td>
+                                <td class="px-3 py-3 text-center"><span class="badge bg-warning text-dark">Solo Bluetooth</span></td>
+                                <td class="px-3 py-3 text-center"><span class="badge bg-secondary">App limitata</span></td>
+                                <td class="px-3 py-3 text-center"><span class="badge bg-danger">✗</span></td>
+                                <td class="px-3 py-3 text-center"><span class="badge bg-danger">✗</span></td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-3">Sistemi pro industriali</td>
+                                <td class="px-3 py-3 text-center">€500–2.000</td>
+                                <td class="px-3 py-3 text-center"><span class="badge bg-success">✓</span></td>
+                                <td class="px-3 py-3 text-center"><span class="badge bg-warning text-dark">✓ Complessa</span></td>
+                                <td class="px-3 py-3 text-center"><span class="badge bg-danger">✗</span></td>
+                                <td class="px-3 py-3 text-center"><span class="badge bg-secondary">Raramente</span></td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-3">Irrigazione automatica timer</td>
+                                <td class="px-3 py-3 text-center">€30–80</td>
+                                <td class="px-3 py-3 text-center"><span class="badge bg-danger">✗</span></td>
+                                <td class="px-3 py-3 text-center"><span class="badge bg-danger">✗</span></td>
+                                <td class="px-3 py-3 text-center"><span class="badge bg-danger">✗</span></td>
+                                <td class="px-3 py-3 text-center"><span class="badge bg-danger">✗</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-center text-white opacity-75 small mt-3">
+                    <i class="bi bi-info-circle me-1"></i>
+                    IbleoCare occupa un posizionamento unico: prezzo accessibile B2C ma con funzionalità e affidabilità da B2B.
+                </p>
+                <div class="text-center mt-4">
+                    <a href="business-prezzi.html" class="btn btn-success btn-lg rounded-pill px-5 py-3 fw-bold shadow">
+                        Vedi i Prezzi Dettagliati <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-dark text-white py-5 border-top border-success border-5">
+    <div class="container text-center text-md-start">
+        <div class="row g-4 align-items-center">
+            <div class="col-md-4 text-center text-md-start">
+                <h3 class="fw-bold text-success mb-2">🌿 IbleoCare</h3>
+                <p class="small opacity-50 mb-0">L'IoT che rispetta la natura.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <a href="/login.html" class="btn btn-outline-success rounded-pill px-4">Accesso Portale Privato</a>
+            </div>
+            <div class="col-md-4 text-center text-md-end">
+                <p class="mb-0 small opacity-50">&copy; 2026 IbleoCare Project.<br>Team JA Italia.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

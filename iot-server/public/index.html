@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IbleoCare — Smart IoT Agriculture</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root { 
+            --primary-green: #20c997; 
+            --dark-green: #0a2e1c; 
+            --earth-brown: #8B4513;
+        }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            scroll-behavior: smooth; 
+            background-color: #f8fbf9;
+        }
+
+        /* NAVBAR TRASPARENTE SCROLLABILE */
+        .navbar { 
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent) !important; 
+            position: fixed; 
+            top: 0;
+            width: 100%; 
+            z-index: 1000;
+            padding-top: 15px;
+            padding-bottom: 15px;
+            transition: background 0.3s ease, padding 0.3s ease;
+        }
+
+        .navbar-brand img {
+            transition: height 0.3s ease;
+        }
+
+        /* STILI MENU DESKTOP E TENDINE */
+        .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            font-weight: 500;
+            font-size: 1.1rem;
+            margin: 0 5px;
+            transition: color 0.3s;
+        }
+        .nav-link:hover, .nav-link:focus {
+            color: var(--primary-green) !important;
+        }
+        
+        .dropdown-menu {
+            background-color: rgba(10, 46, 28, 0.95);
+            border: 1px solid rgba(32, 201, 151, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        .dropdown-item {
+            color: white;
+            transition: background 0.2s, padding-left 0.2s;
+        }
+        .dropdown-item:hover {
+            background-color: rgba(32, 201, 151, 0.2);
+            color: var(--primary-green);
+            padding-left: 20px;
+        }
+
+        /* OFFCANVAS PER MOBILE */
+        .offcanvas-end {
+            background-color: var(--dark-green);
+            color: white;
+            border-left: 4px solid var(--primary-green);
+        }
+
+        .navbar-toggler {
+            border: none;
+            box-shadow: none !important;
+        }
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        /* HERO SECTION */
+        .hero-section { 
+            background: linear-gradient(rgba(10, 46, 28, 0.6), rgba(10, 46, 28, 0.6)), url('https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&q=80&w=1500'); 
+            background-size: cover; 
+            background-position: center; 
+            background-attachment: fixed;
+            color: white; 
+            padding: 220px 0 120px 0;
+            text-align: center;
+        }
+
+        /* SEZIONI E TITOLI */
+        .section-title { font-weight: 800; position: relative; margin-bottom: 60px; text-align: center; color: var(--dark-green); text-transform: uppercase; letter-spacing: 2px;}
+        .section-title::after { content: ''; width: 80px; height: 4px; background: var(--primary-green); position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); border-radius: 2px;}
+        section { padding: 100px 0; }
+
+        /* CARDS & BOXES */
+        .card-custom { border: none; transition: transform 0.3s, box-shadow 0.3s; border-radius: 15px; overflow: hidden; }
+        .card-custom:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        .step-box { border-left: 4px solid var(--primary-green); padding-left: 25px; margin-bottom: 40px; position: relative; }
+        .step-box::before { content: ''; position: absolute; left: -12px; top: 0; width: 20px; height: 20px; background: var(--primary-green); border-radius: 50%; border: 4px solid #fff; }
+        
+        /* PREZZI BADGE */
+        .price-tag {
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: inline-block;
+            box-shadow: 0 5px 15px rgba(32, 201, 151, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark" id="mainNav">
+        <div class="container-fluid px-4 px-lg-5">
+            
+            <a class="navbar-brand" href="index.html">
+                <img src="icon.svg" alt="Logo IbleoCare" height="80" id="navLogo" style="filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5));">
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+                <div class="offcanvas-header border-bottom border-success border-opacity-25 p-4">
+                    <h5 class="offcanvas-title fw-bold text-success" id="offcanvasNavbarLabel"><i class="bi bi-tree-fill me-2"></i>IbleoCare</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                
+                <div class="offcanvas-body">
+                    <ul class="navbar-nav justify-content-end align-items-lg-center flex-grow-1 pe-3 gap-2">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link auto-close" href="#home">Home</a>
+                        </li>
+                        
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Il Progetto
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="progetto-descrizione.html">Descrizione Generale</a></li>
+                                <li><a class="dropdown-item" href="progetto-mission.html">Mission &amp; Obiettivi</a></li>
+                                <li><a class="dropdown-item" href="progetto-prototipo.html">Prototipo Arduino R4</a></li>
+                                <li><a class="dropdown-item" href="progetto-prodotto-finito.html">Prodotto Finito PCB</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                La Soluzione
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="soluzione-problema.html">Il Problema</a></li>
+                                <li><a class="dropdown-item" href="soluzione-funzionamento.html">Come Funziona</a></li>
+                                <li><a class="dropdown-item" href="soluzione-tecnologie.html">Tecnologie & Componenti</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Business
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="business-valore.html">Value Proposition</a></li>
+                                <li><a class="dropdown-item" href="business-mercato.html">Mercato</a></li>
+                                <li><a class="dropdown-item" href="business-prezzi.html">Costi e Prezzi</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link auto-close" href="#chisiamo">Chi Siamo</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link auto-close" href="#contatti">Contatti</a>
+                        </li>
+
+                        <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
+                            <a href="/login.html" class="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm w-100">
+                                <i class="bi bi-lock-fill me-1"></i> Area Privata
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header id="home" class="hero-section">
+        <div class="container mt-5">
+            <span class="badge bg-success px-3 py-2 rounded-pill mb-3 fs-6 shadow">Nature Meets IoT</span>
+            <h1 class="display-1 fw-bold mb-3" style="text-shadow: 2px 4px 15px rgba(0,0,0,0.7);">IbleoCare</h1>
+            <p class="h2 fw-light mb-4 text-light">L'intelligenza artificiale per il futuro dell'agricoltura</p>
+            <p class="lead mb-5 mx-auto text-white-50" style="max-width: 800px; font-size: 1.25rem;">Sistema IoT avanzato per il monitoraggio e l'automazione delle risorse idriche, garantendo salute alle tue piante e sostenibilità al pianeta.</p>
+        </div>
+    </header>
+
+    <section id="progetto-descrizione" class="container">
+        <h2 class="section-title">Il Progetto</h2>
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-10 text-center">
+                <p class="fs-4 text-dark mb-5 lh-base">IbleoCare è un ecosistema di monitoraggio basato su <strong class="text-success">Arduino R4 WiFi</strong> e protocollo <strong class="text-success">MQTT</strong> progettato per rivoluzionare la gestione del verde. Attraverso l'analisi dei dati in tempo reale, permettiamo una cura precisa e scientifica di ogni singola pianta.</p>
+                
+                <div id="progetto-mission" class="row text-start g-5 mt-3">
+                    <div class="col-md-6">
+                        <div class="card card-custom h-100 bg-white shadow-sm p-5 border-bottom border-success border-5">
+                            <h3 class="text-success mb-4 fw-bold"><i class="bi bi-bullseye fs-1 d-block mb-3"></i> La nostra Mission</h3>
+                            <p class="fs-5 text-muted">Semplificare la gestione agricola e vivaistica attraverso l'automazione, rendendo la tecnologia avanzata accessibile, sicura e soprattutto sostenibile per l'ambiente.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card card-custom h-100 bg-white shadow-sm p-5 border-bottom border-success border-5">
+                            <h3 class="text-success mb-4 fw-bold"><i class="bi bi-flag fs-1 d-block mb-3"></i> I nostri Obiettivi</h3>
+                            <ul class="fs-5 text-muted lh-lg">
+                                <li>Ottimizzazione delle risorse idriche <strong>(-40% di sprechi)</strong>.</li>
+                                <li>Riduzione drastica della mortalità delle colture.</li>
+                                <li>Monitoraggio remoto globale h24 da qualsiasi device.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="soluzione-problema" class="bg-dark text-white">
+        <div class="container">
+            <h2 class="section-title text-white">La Soluzione</h2>
+            
+            <div class="row align-items-center mt-5 g-5">
+                <div class="col-lg-5">
+                    <h3 class="fw-bold mb-4 text-success">Il Problema</h3>
+                    <p class="fs-5 opacity-75 mb-5">Ogni anno tonnellate di acqua vengono sprecate per irrigazioni eccessive o non ottimizzate. Molte piante muoiono per asfissia radicale a causa di una gestione manuale approssimativa e non basata sui dati reali del suolo.</p>
+                    
+                    <div id="soluzione-funzionamento">
+                        <h4 class="fw-bold mb-4">Come Funziona</h4>
+                        <div class="step-box">
+                            <h5 class="fw-bold text-success">1. Rilevazione Intelligente</h5>
+                            <p class="opacity-75 mb-0">I sensori capacitivi monitorano umidità e temperatura del suolo senza degradarsi nel tempo.</p>
+                        </div>
+                        <div class="step-box">
+                            <h5 class="fw-bold text-success">2. Trasmissione Cloud</h5>
+                            <p class="opacity-75 mb-0">I dati vengono inviati in tempo reale tramite protocollo leggero MQTT al nostro server Node.js.</p>
+                        </div>
+                        <div class="step-box border-0">
+                            <h5 class="fw-bold text-success">3. Analisi e Azione</h5>
+                            <p class="opacity-75 mb-0">La Dashboard web processa i dati e attiva l'irrigazione automatica o invia notifiche push all'utente.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="soluzione-tecnologie" class="col-lg-7">
+                    <div class="p-5 bg-white text-dark shadow-lg rounded-4 position-relative">
+                        <div class="position-absolute top-0 start-50 translate-middle bg-success text-white px-4 py-2 rounded-pill fw-bold shadow">
+                            Componenti & Tecnologie
+                        </div>
+                        <div class="row g-4 mt-3 text-center">
+                            <div class="col-6 col-md-4">
+                                <i class="bi bi-cpu text-success display-4"></i>
+                                <h6 class="mt-3 fw-bold">Arduino UNO R4 WiFi</h6>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <i class="bi bi-moisture text-success display-4"></i>
+                                <h6 class="mt-3 fw-bold">Sensori Capacitivi</h6>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <i class="bi bi-router text-success display-4"></i>
+                                <h6 class="mt-3 fw-bold">MQTT Broker</h6>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <i class="bi bi-database text-success display-4"></i>
+                                <h6 class="mt-3 fw-bold">PostgreSQL</h6>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <i class="bi bi-filetype-js text-success display-4"></i>
+                                <h6 class="mt-3 fw-bold">Node.js + Express</h6>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <i class="bi bi-graph-up text-success display-4"></i>
+                                <h6 class="mt-3 fw-bold">Chart.js Dashboard</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="business-valore" class="container">
+        <h2 class="section-title">Modello di Business</h2>
+        
+        <div class="row text-center mb-5 mt-4">
+            <div class="col-12">
+                <p class="fs-5 text-muted max-w-700 mx-auto">Offriamo un sistema scalabile, rivolto sia all'hobbista (B2C) che alle grandi aziende agricole e vivai (B2B), con un rapido ritorno sull'investimento garantito dal risparmio idrico ed energetico.</p>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card card-custom h-100 p-4 text-center bg-light">
+                    <i class="bi bi-shield-check display-4 text-success mb-3"></i>
+                    <h4 class="fw-bold">Affidabilità B2B</h4>
+                    <p class="text-muted">Infrastruttura testata per serre e vivai. Nessun down del sistema grazie al salvataggio locale in assenza di rete.</p>
+                </div>
+            </div>
+            <div id="business-mercato" class="col-md-4">
+                <div class="card card-custom h-100 p-4 text-center bg-light">
+                    <i class="bi bi-globe-americas display-4 text-success mb-3"></i>
+                    <h4 class="fw-bold">Mercato Ampio</h4>
+                    <p class="text-muted">Soluzione progettata per scalare da un singolo vaso sul balcone fino a ettari di coltivazioni intensive.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-custom h-100 p-4 text-center bg-light">
+                    <i class="bi bi-droplet-half display-4 text-success mb-3"></i>
+                    <h4 class="fw-bold">ROI Rapido</h4>
+                    <p class="text-muted">Ammortamento del costo hardware in meno di 6 mesi grazie al risparmio idrico ed energetico.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="business-prezzi" class="row justify-content-center mt-5">
+            <div class="col-lg-10">
+                <div class="card border-success border-2 shadow-lg rounded-4 overflow-hidden">
+                    <div class="row g-0">
+                        <div class="col-md-6 bg-success text-white p-5 text-center d-flex flex-column justify-content-center">
+                            <h3 class="fw-bold mb-3">Fase 1: Prototipo</h3>
+                            <p class="opacity-75 mb-4">Costi sostenuti per la realizzazione del singolo hardware dimostrativo, cablaggi e sensori di prova.</p>
+                            <div>
+                                <span class="price-tag bg-white text-success">Costo: € 85,00</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 bg-white p-5 text-center d-flex flex-column justify-content-center">
+                            <h3 class="fw-bold mb-3 text-dark">Fase 2: Prodotto Finito</h3>
+                            <p class="text-muted mb-4">Prezzo di mercato stimato per la vendita del kit base (1 Hub WiFi + 3 sensori suolo + Alimentazione).</p>
+                            <div>
+                                <span class="price-tag bg-success text-white">Prezzo al pubblico: € 149,00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="chisiamo" class="bg-success text-white text-center">
+        <div class="container">
+            <h2 class="section-title text-white">Chi Siamo</h2>
+            <div class="row justify-content-center mt-5">
+                <div class="col-md-10">
+                    <img src="icon.svg" alt="Team IbleoCare" height="100" class="mb-4" style="filter: brightness(0) invert(1);">
+                    <p class="fs-4 mb-5 lh-base">Siamo un team scolastico che ha pensato a questo progetto per un concorso di <strong>JA Italia</strong>. Siamo 9 alunni, supportati da un professore di informatica per la parte di web design, una professoressa di economia per l'analisi dei costi (prezzo del prototipo e del prodotto finale) e un tecnico informatico per la parte hardware, dalle saldature alla scelta dei componenti certificati IP67.</p>
+                    
+                    <h5 class="fw-bold mb-4 opacity-75">IL NOSTRO STACK DI SVILUPPO</h5>
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <span class="badge bg-white text-success p-3 rounded-pill fs-6 shadow-sm"><i class="bi bi-filetype-js me-2"></i>Node.js</span>
+                        <span class="badge bg-white text-success p-3 rounded-pill fs-6 shadow-sm"><i class="bi bi-router me-2"></i>MQTT</span>
+                        <span class="badge bg-white text-success p-3 rounded-pill fs-6 shadow-sm"><i class="bi bi-cpu me-2"></i>Arduino C++</span>
+                        <span class="badge bg-white text-success p-3 rounded-pill fs-6 shadow-sm"><i class="bi bi-database me-2"></i>PostgreSQL</span>
+                        <span class="badge bg-white text-success p-3 rounded-pill fs-6 shadow-sm"><i class="bi bi-bootstrap me-2"></i>Bootstrap 5</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contatti" class="container">
+        <h2 class="section-title">Inizia a Coltivare Smart</h2>
+        <div class="row g-4 mt-2 justify-content-center">
+            <div class="col-md-8">
+                <div class="card p-5 shadow-lg border-0 rounded-4">
+                    <div class="text-center mb-4">
+                        <p class="text-muted">Hai domande sul prototipo, sui prezzi o vuoi implementare IbleoCare nella tua azienda? Scrivici.</p>
+                    </div>
+                    <form>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-success">Nome completo</label>
+                                <input type="text" class="form-control form-control-lg bg-light border-0" placeholder="Mario Rossi">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-success">Email</label>
+                                <input type="email" class="form-control form-control-lg bg-light border-0" placeholder="mario@esempio.it">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold text-success">Il tuo messaggio</label>
+                                <textarea class="form-control form-control-lg bg-light border-0" rows="5" placeholder="Vorrei maggiori informazioni sul prodotto finito..."></textarea>
+                            </div>
+                            <div class="col-12 mt-4 text-center">
+                                <button type="button" class="btn btn-success btn-lg px-5 py-3 rounded-pill fw-bold shadow-lg">INVIA MESSAGGIO <i class="bi bi-send ms-2"></i></button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white py-5 border-top border-success border-5">
+        <div class="container text-center text-md-start">
+            <div class="row g-4 align-items-center">
+                <div class="col-md-4 text-center text-md-start">
+                    <h3 class="fw-bold text-success mb-2">🌿 IbleoCare</h3>
+                    <p class="small opacity-50 mb-0">L'IoT che rispetta la natura.</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <a href="/login.html" class="btn btn-outline-success rounded-pill px-4">Accesso Portale Privato</a>
+                </div>
+                <div class="col-md-4 text-center text-md-end">
+                    <p class="mb-0 small opacity-50">&copy; 2026 IbleoCare Project.<br>Team JA Italia.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Gestione chiusura automatica dell'offcanvas su Mobile SOLO per i link che scorrono (Home, Chi Siamo, Contatti)
+            const autoCloseLinks = document.querySelectorAll('.auto-close');
+            const offcanvasElement = document.getElementById('offcanvasNavbar');
+            let bsOffcanvas = null;
+            
+            if(offcanvasElement) {
+                bsOffcanvas = new bootstrap.Offcanvas(offcanvasElement);
+            }
+
+            autoCloseLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const targetId = this.getAttribute('href');
+                    
+                    if(targetId.startsWith('#')) {
+                        e.preventDefault();
+                        
+                        // Se siamo in modalità mobile chiudi l'offcanvas
+                        if(offcanvasElement.classList.contains('show')) {
+                            const closeBtn = offcanvasElement.querySelector('.btn-close');
+                            if(closeBtn) closeBtn.click();
+                        }
+
+                        // Scorri fluidamente
+                        setTimeout(() => {
+                            const targetSection = document.querySelector(targetId);
+                            if(targetSection) {
+                                const offsetTop = targetSection.getBoundingClientRect().top + window.scrollY - 80;
+                                window.scrollTo({
+                                    top: offsetTop,
+                                    behavior: 'smooth'
+                                });
+                            }
+                        }, 300);
+                    }
+                });
+            });
+
+            // Gestione background della Navbar allo scroll
+            const navbar = document.getElementById('mainNav');
+            const navLogo = document.getElementById('navLogo');
+            
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.style.background = 'rgba(10, 46, 28, 0.95)';
+                    navbar.style.setProperty('background', 'rgba(10, 46, 28, 0.95)', 'important');
+                    navbar.classList.add('shadow');
+                    navbar.style.paddingTop = '10px';
+                    navbar.style.paddingBottom = '10px';
+                    navLogo.style.height = '60px'; 
+                } else {
+                    navbar.style.background = 'linear-gradient(to bottom, rgba(0,0,0,0.8), transparent)';
+                    navbar.style.setProperty('background', 'linear-gradient(to bottom, rgba(0,0,0,0.8), transparent)', 'important');
+                    navbar.classList.remove('shadow');
+                    navbar.style.paddingTop = '15px';
+                    navbar.style.paddingBottom = '15px';
+                    navLogo.style.height = '80px'; 
+                }
+            });
+        });
+    </script>
+</body>
+</html>

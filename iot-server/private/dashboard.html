@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="it" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — IbleoCare</title>
+
+    <!-- Bootstrap 5.3 + Bootstrap Icons 1.11 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Chart.js (CDN) — collegato alla sezione "Grafico Sensori" -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <style>
+        /* ============================================================
+           VARIABILI — Coerenti con index.html e login.html
+        ============================================================ */
+        :root {
+            --primary-green:  #20c997;
+            --dark-green:     #0a2e1c;
+            --earth-brown:    #8B4513;
+            --sidebar-width:  260px;
+            --topbar-height:  64px;
+
+            /* Light mode */
+            --bg-page:        #f0f7f4;
+            --bg-card:        #ffffff;
+            --bg-sidebar:     var(--dark-green);
+            --text-primary:   #1a3a2a;
+            --text-muted:     #6b7e74;
+            --border-subtle:  rgba(32, 201, 151, 0.15);
+            --shadow-card:    0 4px 20px rgba(10, 46, 28, 0.08);
+            --topbar-bg:      #ffffff;
+            --topbar-border:  rgba(32, 201, 151, 0.2);
+        }
+
+        /* Dark mode */
+        [data-bs-theme="dark"] {
+            --bg-page:        #0d1f16;
+            --bg-card:        #12291c;
+            --bg-sidebar:     #081510;
+            --text-primary:   #e0f0e8;
+            --text-muted:     #7aab8f;
+            --border-subtle:  rgba(32, 201, 151, 0.12);
+            --shadow-card:    0 4px 24px rgba(0,0,0,0.35);
+            --topbar-bg:      #0f2218;
+            --topbar-border:  rgba(32, 201, 151, 0.15);
+        }
+
+        /* ============================================================
+           BASE
+        ============================================================ */
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-page);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Barra di accentuazione animata in cima alla pagina */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--dark-green), var(--primary-green), var(--earth-brown));
+            background-size: 200% 100%;
+            animation: shimmerBar 4s linear infinite;
+            z-index: 9999;
+        }
+        @keyframes shimmerBar { 0%{background-position:0% 0%} 100%{background-position:200% 0%} }
+
+        /* ============================================================
+           SIDEBAR
+        ============================================================ */
+        #sidebar {
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            width: var(--sidebar-width);
+            background: var(--bg-sidebar);
+            z-index: 1040;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: width 0.3s ease, transform 0.3s ease;
+            border-right: 1px solid rgba(32,201,151,0.1);
+        }
+
+        /* Motivo foglia decorativo in fondo alla sidebar */
+        #sidebar::after {
+            content: '';
+            position: absolute;
+            bottom: -60px; right: -60px;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(32,201,151,0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Logo area */
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 22px;
+            border-bottom: 1px solid rgba(32,201,151,0.15);
+            text-decoration: none;
+            flex-shrink: 0;
+            margin-top: 3px; /* compensa la barra top */
+        }
+        .sidebar-brand-icon {
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, var(--primary-green), #0d7a58);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(32,201,151,0.35);
+        }
+        .sidebar-brand-text {
+            color: white;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .sidebar-brand-text span {
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 400;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 1px;
+        }
+
+        /* Nav links */
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 0;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(32,201,151,0.2) transparent;
+        }
+        .sidebar-nav-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.25);
+            padding: 12px 22px 6px;
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 11px 22px;
+            color: rgba(255,255,255,0.65);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .sidebar-link i {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            width: 22px;
+            text-align: center;
+        }
+        .sidebar-link:hover {
+            color: white;
+            background: rgba(32,201,151,0.08);
+            border-left-color: rgba(32,201,151,0.4);
+        }
+        .sidebar-link.active {
+            color: var(--primary-green);
+            background: rgba(32,201,151,0.12);
+            border-left-color: var(--primary-green);
+            font-weight: 600;
+        }
+        .sidebar-link .badge-count {
+            margin-left: auto;
+            background: rgba(220, 53, 69, 0.85);
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 7px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        /* Footer sidebar — Logout */
+        .sidebar-footer {
+            border-top: 1px solid rgba(32,201,151,0.12);
+            padding: 16px 0 12px;
+            flex-shrink: 0;
+        }
+        .sidebar-link.logout {
+            color: rgba(255,255,255,0.5);
+        }
+        .sidebar-link.logout:hover {
+            color: #ff6b6b;
+            background: rgba(220,53,69,0.08);
+            border-left-color: rgba(220,53,69,0.5);
+        }
+
+        /* Stato collassato su mobile */
+        @media (max-width: 991.98px) {
+            #sidebar {
+                transform: translateX(-100%);
+            }
+            #sidebar.sidebar-open {
+                transform: translateX(0);
+            }
+            #content-wrapper {
+                margin-left: 0 !important;
+            }
+        }
+
+        /* Overlay mobile */
+        #sidebar-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1039;
+            backdrop-filter: blur(2px);
+        }
+        #sidebar-overlay.visible { display: block; }
+
+        /* ============================================================
+           CONTENT WRAPPER
+        ============================================================ */
+        #content-wrapper {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* ============================================================
+           TOP NAVBAR
+        ============================================================ */
+        #topbar {
+            position: sticky;
+            top: 0;
+            height: var(--topbar-height);
+            background: var(--topbar-bg);
+            border-bottom: 1px solid var(--topbar-border);
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 28px;
+            gap: 16px;
+            box-shadow: 0 1px 8px rgba(10,46,28,0.06);
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .topbar-hamburger {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .topbar-hamburger:hover { background: var(--border-subtle); }
+        @media (max-width: 991.98px) { .topbar-hamburger { display: block; } }
+
+        .topbar-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .topbar-title span {
+            font-weight: 400;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .topbar-spacer { flex: 1; }
+
+        /* Dark mode toggle */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .theme-toggle-track {
+            width: 42px; height: 22px;
+            background: var(--text-muted);
+            border-radius: 11px;
+            position: relative;
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+        .theme-toggle-track.dark { background: var(--primary-green); }
+        .theme-toggle-thumb {
+            position: absolute;
+            top: 3px; left: 3px;
+            width: 16px; height: 16px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+        }
+        .theme-toggle-track.dark .theme-toggle-thumb { transform: translateX(20px); }
+        .theme-icon { font-size: 1rem; color: var(--text-muted); }
+
+        /* Avatar utente */
+        .topbar-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-avatar {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        .user-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+        .user-role {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        /* Status MQTT pill */
+        .mqtt-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: rgba(32,201,151,0.1);
+            color: var(--primary-green);
+            border: 1px solid rgba(32,201,151,0.25);
+        }
+        .mqtt-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--primary-green);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%,100% { box-shadow: 0 0 0 0 rgba(32,201,151,0.5); }
+            50%      { box-shadow: 0 0 0 5px rgba(32,201,151,0); }
+        }
+
+        /* ============================================================
+           MAIN CONTENT
+        ============================================================ */
+        #main-content {
+            flex: 1;
+            padding: 28px;
+        }
+
+        /* Page header */
+        .page-header {
+            margin-bottom: 28px;
+        }
+        .page-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 3px;
+        }
+        .page-header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* ============================================================
+           KPI CARDS
+        ============================================================ */
+        .kpi-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 22px 24px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-subtle);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(10,46,28,0.12);
+        }
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            opacity: 0.05;
+            transform: translate(40px, -40px);
+        }
+        .kpi-card.c-green::before  { background: #20c997; }
+        .kpi-card.c-blue::before   { background: #0d6efd; }
+        .kpi-card.c-orange::before { background: #fd7e14; }
+        .kpi-card.c-purple::before { background: #6f42c1; }
+
+        .kpi-icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+        }
+        .kpi-card.c-green  .kpi-icon { background: rgba(32,201,151,0.12); color: var(--primary-green); }
+        .kpi-card.c-blue   .kpi-icon { background: rgba(13,110,253,0.1);  color: #0d6efd; }
+        .kpi-card.c-orange .kpi-icon { background: rgba(253,126,20,0.1);  color: #fd7e14; }
+        .kpi-card.c-purple .kpi-icon { background: rgba(111,66,193,0.1);  color: #6f42c1; }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+        .kpi-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .kpi-delta {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .kpi-delta.up   { color: #20c997; }
+        .kpi-delta.down { color: #dc3545; }
+        .kpi-delta.neutral { color: var(--text-muted); }
+
+        /* ============================================================
+           CHART CARD
+        ============================================================ */
+        .chart-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-subtle);
+        }
+        .chart-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .chart-card-header h2 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        .chart-card-header p {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin: 2px 0 0;
+        }
+        .chart-legend {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .chart-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+        .chart-legend-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+        }
+        .chart-canvas-wrapper {
+            position: relative;
+            height: 280px;
+        }
+        /* Skeleton loader del grafico */
+        .chart-skeleton {
+            position: absolute;
+            inset: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--bg-page);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            gap: 0;
+        }
+        .chart-skeleton-bar {
+            height: 60%;
+            background: linear-gradient(90deg,
+                var(--border-subtle) 25%,
+                rgba(32,201,151,0.08) 50%,
+                var(--border-subtle) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px 4px 0 0;
+        }
+        @keyframes shimmer {
+            0%   { background-position: -200% 0; }
+            100% { background-position:  200% 0; }
+        }
+        #sensor-chart { display: none; }
+
+        /* ============================================================
+           ALARMS CARD
+        ============================================================ */
+        .alarms-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-subtle);
+            height: 100%;
+        }
+        .alarms-card h2 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 18px;
+        }
+
+        .alarm-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            margin-bottom: 10px;
+            transition: background 0.2s;
+        }
+        .alarm-item.warn {
+            background: rgba(253,126,20,0.06);
+            border-color: rgba(253,126,20,0.15);
+        }
+        .alarm-item.danger {
+            background: rgba(220,53,69,0.06);
+            border-color: rgba(220,53,69,0.15);
+        }
+        .alarm-item.info {
+            background: rgba(13,110,253,0.05);
+            border-color: rgba(13,110,253,0.12);
+        }
+        .alarm-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        .alarm-item.warn   .alarm-icon { background: rgba(253,126,20,0.15); color: #fd7e14; }
+        .alarm-item.danger .alarm-icon { background: rgba(220,53,69,0.15);  color: #dc3545; }
+        .alarm-item.info   .alarm-icon { background: rgba(13,110,253,0.12); color: #0d6efd; }
+        .alarm-body { flex: 1; min-width: 0; }
+        .alarm-body strong {
+            display: block;
+            font-size: 0.83rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .alarm-body small {
+            font-size: 0.73rem;
+            color: var(--text-muted);
+        }
+        .alarm-time {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 32px 16px;
+        }
+        .empty-state-icon {
+            width: 72px; height: 72px;
+            background: rgba(32,201,151,0.1);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem;
+            color: var(--primary-green);
+            margin: 0 auto 16px;
+        }
+        .empty-state h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+        .empty-state p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* ============================================================
+           NODES TABLE CARD (mini-preview)
+        ============================================================ */
+        .nodes-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-subtle);
+        }
+        .nodes-card h2 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 18px;
+        }
+        .node-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .node-row:last-child { border-bottom: none; }
+        .node-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .node-dot.online  { background: var(--primary-green); box-shadow: 0 0 0 3px rgba(32,201,151,0.2); }
+        .node-dot.offline { background: #dc3545; box-shadow: 0 0 0 3px rgba(220,53,69,0.15); }
+        .node-dot.warn    { background: #fd7e14; box-shadow: 0 0 0 3px rgba(253,126,20,0.15); }
+        .node-name {
+            flex: 1;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .node-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .node-badge {
+            font-size: 0.7rem;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        /* ============================================================
+           RESPONSIVE UTILITIES
+        ============================================================ */
+        @media (max-width: 575.98px) {
+            #main-content { padding: 18px 16px; }
+            .kpi-value { font-size: 1.6rem; }
+            .mqtt-status .mqtt-label { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ================================================================
+     SIDEBAR — Navigazione principale (area privata)
+     BACKEND HOOK: I link di navigazione puntano a pagine da creare
+     nella cartella /private/. Sostituire i href="#" con i path reali.
+================================================================ -->
+<aside id="sidebar">
+
+    <!-- Logo / Brand -->
+    <a class="sidebar-brand" href="/private/dashboard.html">
+        <div class="sidebar-brand-icon">
+            <i class="bi bi-tree-fill"></i>
+        </div>
+        <div class="sidebar-brand-text">
+            IbleoCare
+            <span>Area Riservata</span>
+        </div>
+    </a>
+
+    <!-- Nav principale -->
+    <nav class="sidebar-nav">
+        <div class="sidebar-nav-label">Menu Principale</div>
+
+        <!-- ATTIVO: Dashboard -->
+        <a class="sidebar-link active" href="/private/dashboard.html">
+            <i class="bi bi-grid-1x2-fill"></i>
+            Dashboard
+        </a>
+
+        <!-- BACKEND HOOK: link a /private/nodes.html -->
+        <a class="sidebar-link" href="#">
+            <i class="bi bi-cpu-fill"></i>
+            Nodi IoT
+        </a>
+
+        <!-- BACKEND HOOK: link a /private/history.html -->
+        <a class="sidebar-link" href="#">
+            <i class="bi bi-clock-history"></i>
+            Storico Dati
+        </a>
+
+        <!-- BACKEND HOOK: link a /private/control.html -->
+        <a class="sidebar-link" href="#">
+            <i class="bi bi-sliders2-vertical"></i>
+            Controllo
+        </a>
+
+        <div class="sidebar-nav-label" style="margin-top:8px;">Sistema</div>
+
+        <!-- BACKEND HOOK: link a /private/notifications.html -->
+        <!-- Il badge-count va valorizzato dinamicamente dal backend
+             con il conteggio delle notifiche non lette -->
+        <a class="sidebar-link" href="#" id="nav-notifications">
+            <i class="bi bi-bell-fill"></i>
+            Notifiche
+            <span class="badge-count" id="sidebar-notif-count">3</span>
+        </a>
+
+        <!-- BACKEND HOOK: link a /private/settings.html -->
+        <a class="sidebar-link" href="#">
+            <i class="bi bi-gear-fill"></i>
+            Impostazioni
+        </a>
+    </nav>
+
+    <!-- Footer sidebar — Logout -->
+    <div class="sidebar-footer">
+        <!-- BACKEND HOOK: la funzione handleLogout() chiama POST /api/logout
+             e invalida il token sul server prima del redirect -->
+        <a class="sidebar-link logout" href="#" id="logout-btn">
+            <i class="bi bi-box-arrow-left"></i>
+            Logout
+        </a>
+    </div>
+</aside>
+
+<!-- Overlay scuro su mobile quando sidebar è aperta -->
+<div id="sidebar-overlay"></div>
+
+
+<!-- ================================================================
+     CONTENT WRAPPER
+================================================================ -->
+<div id="content-wrapper">
+
+    <!-- ============================================================
+         TOP NAVBAR
+    ============================================================ -->
+    <header id="topbar">
+
+        <!-- Hamburger (visibile solo su mobile/tablet) -->
+        <button class="topbar-hamburger" id="sidebar-toggle" aria-label="Apri menu">
+            <i class="bi bi-list"></i>
+        </button>
+
+        <!-- Titolo pagina corrente -->
+        <div class="topbar-title">
+            Dashboard
+            <span>/ Area Riservata</span>
+        </div>
+
+        <!-- Pill stato MQTT
+             BACKEND HOOK: aggiornare dinamicamente la classe e il testo
+             in base all'effettivo stato del broker MQTT via WebSocket
+             o polling GET /api/mqtt/status -->
+        <div class="mqtt-status ms-2 d-none d-sm-flex" id="mqtt-status-pill">
+            <span class="mqtt-dot" id="mqtt-dot"></span>
+            <span class="mqtt-label" id="mqtt-label">MQTT Connesso</span>
+        </div>
+
+        <div class="topbar-spacer"></div>
+
+        <!-- Toggle Dark / Light Mode -->
+        <label class="theme-toggle" title="Cambia tema" id="theme-toggle">
+            <i class="bi bi-sun-fill theme-icon" id="theme-icon-sun"></i>
+            <div class="theme-toggle-track" id="theme-track">
+                <div class="theme-toggle-thumb"></div>
+            </div>
+            <i class="bi bi-moon-stars-fill theme-icon" id="theme-icon-moon"></i>
+        </label>
+
+        <!-- Avatar + nome utente
+             BACKEND HOOK: recuperare il nome reale dell'utente da GET /api/me
+             o dal payload del JWT decodificato lato client -->
+        <div class="topbar-user ms-3">
+            <div class="user-avatar" id="user-avatar">MR</div>
+            <div class="d-none d-md-block">
+                <div class="user-name" id="user-display-name">Mario Rossi</div>
+                <div class="user-role">Amministratore</div>
+            </div>
+        </div>
+
+    </header>
+
+
+    <!-- ============================================================
+         MAIN CONTENT
+    ============================================================ -->
+    <main id="main-content">
+
+        <!-- Page header -->
+        <div class="page-header">
+            <h1>Benvenuto, <span id="welcome-name" style="color:var(--primary-green)">Mario</span> 👋</h1>
+            <p id="dashboard-subtitle">Panoramica del tuo impianto — Ultimo aggiornamento: <span id="last-update">--</span></p>
+        </div>
+
+
+        <!-- --------------------------------------------------------
+             SEZIONE 1: KPI Cards
+             BACKEND HOOK: valorizzare ogni .kpi-value via fetch() su:
+               GET /api/dashboard/summary
+             Risposta attesa: { devices_active, last_humidity, mqtt_status, total_alerts }
+        -------------------------------------------------------- -->
+        <div class="row g-3 mb-4">
+
+            <!-- KPI 1: Dispositivi Attivi -->
+            <div class="col-6 col-xl-3">
+                <div class="kpi-card c-green">
+                    <div class="kpi-icon"><i class="bi bi-cpu-fill"></i></div>
+                    <!-- BACKEND HOOK: aggiornare con il valore da /api/dashboard/summary -->
+                    <div class="kpi-value" id="kpi-devices">4</div>
+                    <div class="kpi-label">Dispositivi Attivi</div>
+                    <div class="kpi-delta up">
+                        <i class="bi bi-arrow-up-short"></i> +1 rispetto a ieri
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI 2: Umidità Suolo Media -->
+            <div class="col-6 col-xl-3">
+                <div class="kpi-card c-blue">
+                    <div class="kpi-icon"><i class="bi bi-droplet-fill"></i></div>
+                    <!-- BACKEND HOOK: ultima lettura media umidità da /api/sensors/latest -->
+                    <div class="kpi-value" id="kpi-humidity">63<small style="font-size:1rem;font-weight:600">%</small></div>
+                    <div class="kpi-label">Umidità Media Suolo</div>
+                    <div class="kpi-delta down">
+                        <i class="bi bi-arrow-down-short"></i> -5% dall'ultima ora
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI 3: Temperatura Aria -->
+            <div class="col-6 col-xl-3">
+                <div class="kpi-card c-orange">
+                    <div class="kpi-icon"><i class="bi bi-thermometer-half"></i></div>
+                    <!-- BACKEND HOOK: temperatura da /api/sensors/latest -->
+                    <div class="kpi-value" id="kpi-temp">24<small style="font-size:1rem;font-weight:600">°C</small></div>
+                    <div class="kpi-label">Temperatura Aria</div>
+                    <div class="kpi-delta neutral">
+                        <i class="bi bi-dash"></i> Stabile
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI 4: Allarmi Attivi -->
+            <div class="col-6 col-xl-3">
+                <div class="kpi-card c-purple">
+                    <div class="kpi-icon"><i class="bi bi-bell-fill"></i></div>
+                    <!-- BACKEND HOOK: conteggio allarmi attivi da /api/alarms?status=active -->
+                    <div class="kpi-value" id="kpi-alerts">3</div>
+                    <div class="kpi-label">Allarmi Attivi</div>
+                    <div class="kpi-delta down">
+                        <i class="bi bi-exclamation-circle"></i> Richiede attenzione
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- --------------------------------------------------------
+             SEZIONE 2: Grafico Sensori + Allarmi (affiancati)
+        -------------------------------------------------------- -->
+        <div class="row g-3 mb-4">
+
+            <!-- Grafico Linee Umidità / Temperatura
+                 BACKEND HOOK: sostituire i dati mockup con quelli reali
+                 recuperati da GET /api/sensors/history?hours=24
+                 Risposta attesa: array di { timestamp, humidity, temperature }
+            -->
+            <div class="col-lg-8">
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <div>
+                            <h2><i class="bi bi-graph-up-arrow me-2" style="color:var(--primary-green)"></i>Andamento Sensori — Ultime 24h</h2>
+                            <p>Umidità suolo (%) e temperatura aria (°C) in tempo reale</p>
+                        </div>
+                        <div class="chart-legend">
+                            <div class="chart-legend-item">
+                                <div class="chart-legend-dot" style="background:#20c997"></div>
+                                Umidità
+                            </div>
+                            <div class="chart-legend-item">
+                                <div class="chart-legend-dot" style="background:#fd7e14"></div>
+                                Temperatura
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Canvas + Skeleton Loader sovrapposti -->
+                    <div class="chart-canvas-wrapper">
+                        <!-- Skeleton: visibile durante il caricamento dati -->
+                        <div class="chart-skeleton" id="chart-skeleton">
+                            <div class="chart-skeleton-bar" style="height:65%; margin: 0 4px;"></div>
+                        </div>
+                        <!-- Canvas Chart.js: nascosto finché i dati non sono pronti -->
+                        <canvas id="sensor-chart" style="display:none; width:100%; height:100%;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sezione Allarmi / Notifiche
+                 BACKEND HOOK: caricare da GET /api/alarms?limit=5&sort=desc
+                 Se l'array è vuoto, mostrare l'empty state.
+                 Il rendering condizionale è gestito da renderAlarms() in JS.
+            -->
+            <div class="col-lg-4">
+                <div class="alarms-card">
+                    <h2><i class="bi bi-bell me-2" style="color:#fd7e14"></i>Ultimi Allarmi</h2>
+                    <div id="alarms-container">
+                        <!-- Popolato dinamicamente da renderAlarms() -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- --------------------------------------------------------
+             SEZIONE 3: Stato Nodi IoT (mini-tabella)
+             BACKEND HOOK: caricare da GET /api/nodes
+             Risposta attesa: array di { id, name, status, humidity, temperature, last_seen }
+        -------------------------------------------------------- -->
+        <div class="row g-3">
+            <div class="col-12">
+                <div class="nodes-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h2 class="mb-0"><i class="bi bi-hdd-network me-2" style="color:var(--primary-green)"></i>Stato Nodi IoT</h2>
+                        <a href="#" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                            Gestisci <i class="bi bi-arrow-right-short"></i>
+                        </a>
+                    </div>
+
+                    <div id="nodes-list">
+                        <!-- Popolato da renderNodes() -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main><!-- /#main-content -->
+
+</div><!-- /#content-wrapper -->
+
+
+<!-- ================================================================
+     SCRIPTS
+================================================================ -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+'use strict';
+
+/* ================================================================
+   1. MIDDLEWARE DI PROTEZIONE — Auth Guard
+   Verifica la presenza di un token in sessionStorage (priorità) o
+   localStorage prima di mostrare qualsiasi contenuto.
+
+   BACKEND HOOK: sostituire la verifica locale con una chiamata a
+   GET /api/me con Authorization: Bearer <token>
+   Se il server risponde 401, eseguire handleLogout().
+================================================================ */
+(function authGuard() {
+    const token = sessionStorage.getItem('ibleocare_token')
+                || localStorage.getItem('ibleocare_token');
+
+    if (!token) {
+        // Reindirizzamento immediato prima che il DOM venga reso
+        window.location.replace('/login.html');
+        // Blocca l'esecuzione dello script successivo
+        throw new Error('AUTH_REQUIRED');
+    }
+})();
+
+
+/* ================================================================
+   2. DARK / LIGHT MODE
+   Salva e ripristina la preferenza in localStorage.
+================================================================ */
+const ThemeManager = (() => {
+    const KEY   = 'ibleocare_theme';
+    const html  = document.documentElement;
+    const track = document.getElementById('theme-track');
+
+    function apply(theme) {
+        html.setAttribute('data-bs-theme', theme);
+        if (track) track.classList.toggle('dark', theme === 'dark');
+        localStorage.setItem(KEY, theme);
+        // Aggiorna i colori di Chart.js se già inizializzato
+        if (window._sensorChart) updateChartTheme(theme);
+    }
+
+    function toggle() {
+        const current = html.getAttribute('data-bs-theme') || 'light';
+        apply(current === 'light' ? 'dark' : 'light');
+    }
+
+    function init() {
+        const saved = localStorage.getItem(KEY)
+            || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        apply(saved);
+    }
+
+    return { init, toggle, current: () => html.getAttribute('data-bs-theme') };
+})();
+
+document.getElementById('theme-toggle').addEventListener('click', () => ThemeManager.toggle());
+ThemeManager.init();
+
+
+/* ================================================================
+   3. SIDEBAR — Toggle mobile e overlay
+================================================================ */
+const sidebar        = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+const sidebarToggle  = document.getElementById('sidebar-toggle');
+
+function openSidebar() {
+    sidebar.classList.add('sidebar-open');
+    sidebarOverlay.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+    sidebar.classList.remove('sidebar-open');
+    sidebarOverlay.classList.remove('visible');
+    document.body.style.overflow = '';
+}
+
+sidebarToggle.addEventListener('click', () => {
+    sidebar.classList.contains('sidebar-open') ? closeSidebar() : openSidebar();
+});
+sidebarOverlay.addEventListener('click', closeSidebar);
+
+
+/* ================================================================
+   4. LOGOUT
+   BACKEND HOOK: sostituire con POST /api/logout { token }
+   per invalidare la sessione server-side prima di pulire il client.
+================================================================ */
+function handleLogout() {
+    // BACKEND HOOK: await fetch('/api/logout', { method: 'POST', ... });
+    sessionStorage.removeItem('ibleocare_token');
+    localStorage.removeItem('ibleocare_token');
+    window.location.href = '/login.html';
+}
+document.getElementById('logout-btn').addEventListener('click', (e) => {
+    e.preventDefault();
+    if (confirm('Sei sicuro di voler uscire?')) handleLogout();
+});
+
+
+/* ================================================================
+   5. DATI UTENTE — Popola il nome nella topbar e nel welcome
+   BACKEND HOOK: sostituire con la risposta di GET /api/me
+   e decodificare il JWT per ottenere name, role, initials.
+================================================================ */
+/* =================================================================
+   FUNZIONI DI SISTEMA E AUTENTICAZIONE (CORRETTE)
+================================================================= */
+
+// Carica i dati dell'utente loggato SENZA fare redirect forzati
+function loadUserInfo() {
+    // Leggiamo l'utente salvato durante il login (oppure mettiamo 'Amministratore' di default)
+    const user = localStorage.getItem('ibleocare_user') || 'Amministratore';
+    
+    // Aggiorniamo i testi nella Top Navbar
+    const userNameEl = document.getElementById('userName');
+    const userRoleEl = document.getElementById('userRole');
+    
+    if (userNameEl) userNameEl.textContent = user;
+    if (userRoleEl) userRoleEl.textContent = 'Project Manager';
+}
+
+// Funzione di logout sicura
+async function logout() {
+    // Conferma prima di uscire
+    if (!confirm('Vuoi davvero uscire da IbleoCare?')) return;
+    
+    try {
+        // 1. Diciamo al server Node.js di distruggere la sessione vera e propria
+        await fetch('/api/logout', { method: 'POST' });
+        
+        // 2. Puliamo le chiavi salvate nel browser
+        localStorage.removeItem('ibleocare_login');
+        localStorage.removeItem('ibleocare_user');
+        
+        // 3. Torniamo alla pagina di login
+        window.location.href = '/login.html';
+    } catch (err) {
+        console.error('Errore durante il logout:', err);
+        // Anche in caso di errore di rete, torniamo alla home per sicurezza
+        window.location.href = '/login.html';
+    }
+}
+
+// Assicuriamoci che loadUserInfo venga eseguito al caricamento della pagina
+document.addEventListener('DOMContentLoaded', () => {
+    loadUserInfo();
+});
+
+
+/* ================================================================
+   6. STATO MQTT
+   BACKEND HOOK: sostituire con fetch() o WebSocket su /ws/mqtt-status
+   per ricevere aggiornamenti in tempo reale.
+   Valori di status: 'connected' | 'disconnected' | 'error'
+================================================================ */
+function updateMQTTStatus(status) {
+    const pill  = document.getElementById('mqtt-status-pill');
+    const dot   = document.getElementById('mqtt-dot');
+    const label = document.getElementById('mqtt-label');
+
+    const map = {
+        connected:    { color: '#20c997', text: 'MQTT Connesso',    dotAnim: true  },
+        disconnected: { color: '#fd7e14', text: 'MQTT Disconnesso', dotAnim: false },
+        error:        { color: '#dc3545', text: 'MQTT Errore',      dotAnim: false }
+    };
+    const cfg = map[status] || map.connected;
+    dot.style.background       = cfg.color;
+    dot.style.animation        = cfg.dotAnim ? '' : 'none';
+    pill.style.color           = cfg.color;
+    pill.style.borderColor     = cfg.color + '44';
+    pill.style.backgroundColor = cfg.color + '18';
+    label.textContent          = cfg.text;
+}
+
+
+/* ================================================================
+   7. ALLARMI — Render condizionale (mockup → agganciare backend)
+   BACKEND HOOK: sostituire alarms con la risposta di
+   GET /api/alarms?limit=5&sort=desc
+================================================================ */
+const MOCK_ALARMS = [
+    { type: 'danger', icon: 'bi-droplet-half',   title: 'Terreno Secco — Nodo 2',      time: '10 min fa',  detail: 'Umidità scesa sotto soglia critica (18%)' },
+    { type: 'warn',   icon: 'bi-thermometer-sun', title: 'Temperatura Alta — Nodo 1',   time: '45 min fa',  detail: 'Temperatura aria >34°C rilevata' },
+    { type: 'info',   icon: 'bi-wifi-off',        title: 'Nodo 3 — Segnale Debole',     time: '2 ore fa',   detail: 'RSSI: -88 dBm, possibile perdita dati' },
+];
+
+function renderAlarms(alarms) {
+    const container = document.getElementById('alarms-container');
+
+    if (!alarms || alarms.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon"><i class="bi bi-check-circle-fill"></i></div>
+                <h3>Tutto sotto controllo</h3>
+                <p>Nessun allarme attivo.<br>Il tuo impianto funziona perfettamente.</p>
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = alarms.map(a => `
+        <div class="alarm-item ${a.type}">
+            <div class="alarm-icon"><i class="bi ${a.icon}"></i></div>
+            <div class="alarm-body">
+                <strong>${a.title}</strong>
+                <small>${a.detail}</small>
+            </div>
+            <div class="alarm-time">${a.time}</div>
+        </div>
+    `).join('');
+}
+
+
+/* ================================================================
+   8. NODI IoT — Render (mockup → agganciare backend)
+   BACKEND HOOK: GET /api/nodes
+================================================================ */
+const MOCK_NODES = [
+    { name: 'Nodo 1 — Campo Nord',   status: 'online',  humidity: 71, temperature: 22.4, lastSeen: 'Adesso' },
+    { name: 'Nodo 2 — Campo Sud',    status: 'warn',    humidity: 18, temperature: 34.1, lastSeen: '8 min fa' },
+    { name: 'Nodo 3 — Serra A',      status: 'online',  humidity: 85, temperature: 26.0, lastSeen: 'Adesso' },
+    { name: 'Nodo 4 — Magazzino',    status: 'offline', humidity: '--', temperature: '--', lastSeen: '3 ore fa' },
+];
+
+const STATUS_LABELS = {
+    online:  { badgeClass: 'bg-success bg-opacity-10 text-success', label: 'Online'  },
+    offline: { badgeClass: 'bg-danger  bg-opacity-10 text-danger',  label: 'Offline' },
+    warn:    { badgeClass: 'bg-warning bg-opacity-10 text-warning',  label: 'Allerta' },
+};
+
+function renderNodes(nodes) {
+    const list = document.getElementById('nodes-list');
+    list.innerHTML = nodes.map(n => {
+        const s = STATUS_LABELS[n.status] || STATUS_LABELS.offline;
+        const humidityDisplay = typeof n.humidity === 'number' ? n.humidity + '%' : n.humidity;
+        const tempDisplay     = typeof n.temperature === 'number' ? n.temperature + '°C' : n.temperature;
+        return `
+        <div class="node-row">
+            <div class="node-dot ${n.status}"></div>
+            <div class="node-name">${n.name}</div>
+            <div class="node-meta d-none d-sm-block">
+                <i class="bi bi-droplet text-primary me-1"></i>${humidityDisplay}
+                &nbsp;&nbsp;
+                <i class="bi bi-thermometer text-warning me-1"></i>${tempDisplay}
+            </div>
+            <div class="node-meta ms-auto me-3 d-none d-md-block" style="font-size:0.72rem">${n.lastSeen}</div>
+            <span class="node-badge ${s.badgeClass}">${s.label}</span>
+        </div>`;
+    }).join('');
+}
+
+
+/* ================================================================
+   9. CHART.JS — Grafico sensori con skeleton loader
+   BACKEND HOOK: sostituire i dati mockup con quelli reali recuperati
+   da GET /api/sensors/history?hours=24
+   Formato atteso: [{ label: "HH:MM", humidity: N, temperature: N }]
+================================================================ */
+function generateMockSensorData() {
+    const labels = [], humidity = [], temperature = [];
+    const now = new Date();
+    // Genera 24 punti (ogni ora)
+    for (let i = 23; i >= 0; i--) {
+        const d = new Date(now - i * 3600000);
+        labels.push(d.getHours().toString().padStart(2,'0') + ':00');
+        // Curva umidità con variazione realistica
+        const baseH = 65, baseT = 22;
+        humidity.push(+(baseH + Math.sin(i * 0.4) * 12 + (Math.random() - 0.5) * 8).toFixed(1));
+        temperature.push(+(baseT + Math.cos(i * 0.3) * 5 + (Math.random() - 0.5) * 3).toFixed(1));
+    }
+    return { labels, humidity, temperature };
+}
+
+function getChartColors(theme) {
+    return {
+        humidityLine:    '#20c997',
+        humidityFill:    theme === 'dark' ? 'rgba(32,201,151,0.10)' : 'rgba(32,201,151,0.12)',
+        temperatureLine: '#fd7e14',
+        temperatureFill: theme === 'dark' ? 'rgba(253,126,20,0.08)' : 'rgba(253,126,20,0.08)',
+        gridColor:       theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+        tickColor:       theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+    };
+}
+
+function updateChartTheme(theme) {
+    const chart = window._sensorChart;
+    if (!chart) return;
+    const c = getChartColors(theme);
+    chart.data.datasets[0].borderColor           = c.humidityLine;
+    chart.data.datasets[0].backgroundColor       = c.humidityFill;
+    chart.data.datasets[1].borderColor           = c.temperatureLine;
+    chart.data.datasets[1].backgroundColor       = c.temperatureFill;
+    chart.options.scales.x.grid.color            = c.gridColor;
+    chart.options.scales.x.ticks.color           = c.tickColor;
+    chart.options.scales.humidity.grid.color     = c.gridColor;
+    chart.options.scales.humidity.ticks.color    = c.humidityLine;
+    chart.options.scales.temperature.ticks.color = c.temperatureLine;
+    chart.update('none');
+}
+
+function initChart(data) {
+    const skeleton = document.getElementById('chart-skeleton');
+    const canvas   = document.getElementById('sensor-chart');
+    const theme    = ThemeManager.current();
+    const c        = getChartColors(theme);
+
+    skeleton.style.display = 'none';
+    canvas.style.display   = 'block';
+
+    window._sensorChart = new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels: data.labels,
+            datasets: [
+                {
+                    label:           'Umidità (%)',
+                    data:            data.humidity,
+                    borderColor:     c.humidityLine,
+                    backgroundColor: c.humidityFill,
+                    borderWidth:     2.5,
+                    tension:         0.4,
+                    fill:            true,
+                    yAxisID:         'humidity',
+                    pointRadius:     0,
+                    pointHoverRadius:5,
+                },
+                {
+                    label:           'Temperatura (°C)',
+                    data:            data.temperature,
+                    borderColor:     c.temperatureLine,
+                    backgroundColor: c.temperatureFill,
+                    borderWidth:     2.5,
+                    tension:         0.4,
+                    fill:            true,
+                    yAxisID:         'temperature',
+                    pointRadius:     0,
+                    pointHoverRadius:5,
+                    borderDash:      [5, 3],
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { display: false }, // usiamo la nostra legend custom
+                tooltip: {
+                    backgroundColor: theme === 'dark' ? '#12291c' : '#fff',
+                    borderColor: 'rgba(32,201,151,0.3)',
+                    borderWidth: 1,
+                    titleColor:  theme === 'dark' ? '#e0f0e8' : '#1a3a2a',
+                    bodyColor:   theme === 'dark' ? '#7aab8f'  : '#6b7e74',
+                    padding: 12,
+                    cornerRadius: 10,
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: c.gridColor },
+                    ticks: {
+                        color:    c.tickColor,
+                        font:     { size: 11 },
+                        maxTicksLimit: 8,
+                    }
+                },
+                humidity: {
+                    type: 'linear', position: 'left',
+                    min: 0, max: 100,
+                    grid:  { color: c.gridColor },
+                    ticks: { color: c.humidityLine, font: { size: 11 },
+                             callback: v => v + '%' }
+                },
+                temperature: {
+                    type: 'linear', position: 'right',
+                    min: 0, max: 50,
+                    grid:  { drawOnChartArea: false },
+                    ticks: { color: c.temperatureLine, font: { size: 11 },
+                             callback: v => v + '°C' }
+                }
+            }
+        }
+    });
+}
+
+
+/* ================================================================
+   10. INIZIALIZZAZIONE — DOMContentLoaded
+================================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+
+    // Dati utente
+    loadUserInfo();
+
+    // Stato MQTT (mockup — agganciare WebSocket o polling)
+    updateMQTTStatus('connected');
+
+    // Allarmi — BACKEND HOOK: sostituire MOCK_ALARMS con fetch()
+    renderAlarms(MOCK_ALARMS);
+
+    // Nodi — BACKEND HOOK: sostituire MOCK_NODES con fetch()
+    renderNodes(MOCK_NODES);
+
+    // Grafico con skeleton loader simulato
+    // BACKEND HOOK: sostituire setTimeout con:
+    //   const data = await fetchJSON('/api/sensors/history?hours=24');
+    //   initChart(transformData(data));
+    setTimeout(() => {
+        initChart(generateMockSensorData());
+    }, 1800); // simula latenza di rete
+
+    // Aggiornamento automatico KPI ogni 30 secondi
+    // BACKEND HOOK: dentro refreshKPIs() eseguire fetch('/api/dashboard/summary')
+    // e aggiornare i valori nei .kpi-value corrispondenti
+    setInterval(refreshKPIs, 30000);
+});
+
+/* Funzione di refresh KPI (placeholder — collegare al backend) */
+function refreshKPIs() {
+    // BACKEND HOOK: const data = await fetch('/api/dashboard/summary').then(r=>r.json());
+    // document.getElementById('kpi-devices').textContent  = data.devices_active;
+    // document.getElementById('kpi-humidity').innerHTML   = data.last_humidity + '<small ...>%</small>';
+    // document.getElementById('kpi-temp').innerHTML       = data.temperature + '<small ...>°C</small>';
+    // document.getElementById('kpi-alerts').textContent   = data.total_alerts;
+    document.getElementById('last-update').textContent =
+        new Date().toLocaleString('it-IT', { hour:'2-digit', minute:'2-digit', day:'2-digit', month:'short' });
+}
+</script>
+
+</body>
+</html>

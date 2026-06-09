@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Descrizione Generale — IbleoCare</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root { --primary-green: #20c997; --dark-green: #0a2e1c; --earth-brown: #8B4513; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; scroll-behavior: smooth; background-color: #f8fbf9; padding-top: 80px; }
+        .navbar { background: rgba(10, 46, 28, 0.97) !important; position: fixed; top: 0; width: 100%; z-index: 1000; padding-top: 10px; padding-bottom: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.3); }
+        .nav-link { color: rgba(255,255,255,0.9) !important; font-weight: 500; font-size: 1.05rem; margin: 0 3px; transition: color 0.3s; }
+        .nav-link:hover, .nav-link:focus { color: var(--primary-green) !important; }
+        .dropdown-menu { background-color: rgba(10, 46, 28, 0.97); border: 1px solid rgba(32, 201, 151, 0.2); backdrop-filter: blur(10px); }
+        .dropdown-item { color: white; transition: background 0.2s, padding-left 0.2s; }
+        .dropdown-item:hover { background-color: rgba(32, 201, 151, 0.2); color: var(--primary-green); padding-left: 20px; }
+        .offcanvas-end { background-color: var(--dark-green); color: white; border-left: 4px solid var(--primary-green); }
+        .navbar-toggler { border: none; box-shadow: none !important; }
+        .navbar-toggler-icon { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e"); }
+        .page-hero { padding: 60px 0 50px 0; color: white; position: relative; overflow: hidden; }
+        .page-hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--dark-green) 0%, #0d4a2a 100%); z-index: 0; }
+        .page-hero .container { position: relative; z-index: 1; }
+        .section-title { font-weight: 800; position: relative; margin-bottom: 60px; text-align: center; color: var(--dark-green); text-transform: uppercase; letter-spacing: 2px; }
+        .section-title::after { content: ''; width: 80px; height: 4px; background: var(--primary-green); position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); border-radius: 2px; }
+        section { padding: 80px 0; }
+        .card-custom { border: none; transition: transform 0.3s, box-shadow 0.3s; border-radius: 15px; overflow: hidden; }
+        .card-custom:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        .step-box { border-left: 4px solid var(--primary-green); padding: 20px 25px; margin-bottom: 25px; background: white; border-radius: 0 12px 12px 0; box-shadow: 0 3px 15px rgba(0,0,0,0.06); }
+        .breadcrumb-item a { color: var(--primary-green); text-decoration: none; }
+        .breadcrumb-item.active { color: rgba(255,255,255,0.7); }
+        .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.4); }
+        .price-tag { padding: 15px 25px; border-radius: 50px; font-size: 1.2rem; font-weight: bold; display: inline-block; box-shadow: 0 5px 15px rgba(32,201,151,0.3); text-transform: uppercase; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark" id="mainNav">
+    <div class="container-fluid px-4 px-lg-5">
+        <a class="navbar-brand" href="index.html">
+            <img src="icon.svg" alt="Logo IbleoCare" height="60" style="filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5));">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+            <div class="offcanvas-header border-bottom border-success border-opacity-25 p-4">
+                <h5 class="offcanvas-title fw-bold text-success" id="offcanvasNavbarLabel"><i class="bi bi-tree-fill me-2"></i>IbleoCare</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <ul class="navbar-nav justify-content-end align-items-lg-center flex-grow-1 pe-3 gap-2">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Il Progetto</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="progetto-descrizione.html">Descrizione Generale</a></li>
+                            <li><a class="dropdown-item" href="progetto-mission.html">Mission &amp; Obiettivi</a></li>
+                            <li><a class="dropdown-item" href="progetto-prototipo.html">Prototipo Arduino R4</a></li>
+                            <li><a class="dropdown-item" href="progetto-prodotto-finito.html">Prodotto Finito PCB</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">La Soluzione</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="soluzione-problema.html">Il Problema</a></li>
+                            <li><a class="dropdown-item" href="soluzione-funzionamento.html">Come Funziona</a></li>
+                            <li><a class="dropdown-item" href="soluzione-tecnologie.html">Tecnologie &amp; Componenti</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Business</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="business-valore.html">Value Proposition</a></li>
+                            <li><a class="dropdown-item" href="business-mercato.html">Mercato</a></li>
+                            <li><a class="dropdown-item" href="business-prezzi.html">Costi e Prezzi</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#chisiamo">Chi Siamo</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#contatti">Contatti</a></li>
+                    <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
+                        <a href="/login.html" class="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm w-100">
+                            <i class="bi bi-lock-fill me-1"></i> Area Privata
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Page Hero -->
+<div class="page-hero">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item"><a href="#">Il Progetto</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Descrizione Generale</li>
+            </ol>
+        </nav>
+        <span class="badge bg-success rounded-pill px-3 py-2 mb-3 fs-6">Il Progetto</span>
+        <h1 class="display-4 fw-bold mb-3">Cos'è IbleoCare</h1>
+        <p class="lead opacity-75">Il progetto che nasce da una scuola siciliana per cambiare l'agricoltura</p>
+    </div>
+</div>
+
+<!-- Section 1: Il Progetto -->
+<section style="background: white;">
+    <div class="container py-5">
+        <h2 class="section-title">Il Progetto</h2>
+        <p class="fs-5 text-muted text-center mb-5">
+            IbleoCare è un ecosistema di monitoraggio IoT basato su microcontrollori ESP32/Arduino e protocollo MQTT, progettato da un team scolastico nell'ambito del programma JA Italia. Il sistema raccoglie dati reali dal suolo in tempo reale e li rende disponibili su una dashboard web accessibile da qualsiasi device, permettendo la cura precisa e scientifica delle colture.
+        </p>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card card-custom shadow-sm bg-white p-4 text-center h-100">
+                    <i class="bi bi-cpu text-success display-4 mb-3"></i>
+                    <h5 class="fw-bold">Tecnologia IoT</h5>
+                    <p class="text-muted mb-0">Sensori capacitivi e microcontrollori ARM/ESP32 per rilevazioni precise senza degradazione</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-custom shadow-sm bg-white p-4 text-center h-100">
+                    <i class="bi bi-cloud-check text-success display-4 mb-3"></i>
+                    <h5 class="fw-bold">Cloud MQTT</h5>
+                    <p class="text-muted mb-0">Dati trasmessi in tempo reale via protocollo MQTT leggero, accessibili ovunque nel mondo</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-custom shadow-sm bg-white p-4 text-center h-100">
+                    <i class="bi bi-graph-up-arrow text-success display-4 mb-3"></i>
+                    <h5 class="fw-bold">Dashboard Web</h5>
+                    <p class="text-muted mb-0">Analisi visiva con grafici real-time, storico e notifiche automatiche su soglie configurabili</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section 2: Il Contesto -->
+<section style="background: #f8fbf9;">
+    <div class="container">
+        <h2 class="section-title">Il Contesto</h2>
+        <p class="text-center fs-5 text-muted mb-5">
+            IbleoCare nasce nell'area iblea della Sicilia, una delle zone agricole più produttive d'Italia, dove l'acqua è una risorsa preziosa e spesso scarsa. Il progetto è stato sviluppato nell'ambito di JA Italia (Junior Achievement), la più grande organizzazione non-profit mondiale per l'educazione imprenditoriale nei giovani.
+        </p>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="bg-dark text-white rounded-4 p-4 text-center h-100">
+                    <div class="fs-1 fw-bold text-success mb-2">70%</div>
+                    <p class="mb-0 opacity-75">dell'acqua dolce mondiale è consumata dall'agricoltura</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="bg-dark text-white rounded-4 p-4 text-center h-100">
+                    <div class="fs-1 fw-bold text-success mb-2">40%</div>
+                    <p class="mb-0 opacity-75">di risparmio idrico garantito dal sistema IbleoCare</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="bg-dark text-white rounded-4 p-4 text-center h-100">
+                    <div class="fs-1 fw-bold text-success mb-2">24/7</div>
+                    <p class="mb-0 opacity-75">monitoraggio continuo da qualsiasi device nel mondo</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section 3: Il Team JA Italia -->
+<section style="background: white;">
+    <div class="container">
+        <h2 class="section-title">Il Team JA Italia</h2>
+        <p class="text-center text-muted fs-5 mb-5">
+            Siamo 9 studenti che hanno partecipato al programma JA Italia, supportati da tre figure professionali. Il progetto ha richiesto competenze multidisciplinari: informatica, elettronica, economia e comunicazione.
+        </p>
+        <div class="border border-success border-2 rounded-4 p-4 shadow-sm">
+            <div class="row g-4">
+                <div class="col-md-3 text-center">
+                    <i class="bi bi-people-fill display-3 text-success mb-3"></i>
+                    <h5 class="fw-bold">9 Studenti</h5>
+                    <p class="small text-muted mb-0">Sviluppo, testing, presentazione e business plan</p>
+                </div>
+                <div class="col-md-3 text-center">
+                    <i class="bi bi-mortarboard-fill display-3 text-success mb-3"></i>
+                    <h5 class="fw-bold">Prof. Informatica</h5>
+                    <p class="small text-muted mb-0">Architettura software, web design e firmware</p>
+                </div>
+                <div class="col-md-3 text-center">
+                    <i class="bi bi-bar-chart-fill display-3 text-success mb-3"></i>
+                    <h5 class="fw-bold">Prof. Economia</h5>
+                    <p class="small text-muted mb-0">Analisi dei costi, pricing e modello di business</p>
+                </div>
+                <div class="col-md-3 text-center">
+                    <i class="bi bi-tools display-3 text-success mb-3"></i>
+                    <h5 class="fw-bold">Tecnico Hardware</h5>
+                    <p class="small text-muted mb-0">PCB design, saldature e componentistica IP67</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section 4: Citazione CTA -->
+<section style="background: var(--dark-green);" class="text-white py-5">
+    <div class="container text-center">
+        <i class="bi bi-quote display-1 text-success"></i>
+        <blockquote class="blockquote mb-4">
+            <p class="fs-4 fst-italic">
+                "Crediamo che la tecnologia debba servire la natura, non dominarla. IbleoCare è la nostra risposta concreta al problema globale dello spreco idrico in agricoltura."
+            </p>
+        </blockquote>
+        <div class="row justify-content-center g-3 mt-4">
+            <div class="col-auto">
+                <a href="progetto-mission.html" class="btn btn-success rounded-pill px-4 py-2 fw-bold">Scopri la Mission →</a>
+            </div>
+            <div class="col-auto">
+                <a href="progetto-prototipo.html" class="btn btn-outline-light rounded-pill px-4 py-2 fw-bold">Vedi il Prototipo →</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="bg-dark text-white py-5 border-top border-success border-5">
+    <div class="container text-center text-md-start">
+        <div class="row g-4 align-items-center">
+            <div class="col-md-4 text-center text-md-start">
+                <h3 class="fw-bold text-success mb-2">🌿 IbleoCare</h3>
+                <p class="small opacity-50 mb-0">L'IoT che rispetta la natura.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <a href="/login.html" class="btn btn-outline-success rounded-pill px-4">Accesso Portale Privato</a>
+            </div>
+            <div class="col-md-4 text-center text-md-end">
+                <p class="mb-0 small opacity-50">&copy; 2026 IbleoCare Project.<br>Team JA Italia.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
